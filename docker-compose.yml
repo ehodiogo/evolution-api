@@ -1,38 +1,11 @@
-services:
-  n8n:
-    build: .
-    image: n8nio/n8n:1.106.3
-    restart: unless-stopped
-    ports:
-      - "5678:5678"
-    environment:
-      N8N_PROTOCOL: ${N8N_PROTOCOL}
-      N8N_HOST: ${N8N_HOST}
-      WEBHOOK_URL: ${WEBHOOK_URL}
-      VUE_APP_N8N_PROTOCOL: ${VUE_APP_N8N_PROTOCOL}
-      VUE_APP_N8N_HOST: ${VUE_APP_N8N_HOST}
-      GENERIC_TIMEOUT: ${GENERIC_TIMEOUT}
-      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE}
-      N8N_COOKIE_DOMAIN: ${N8N_COOKIE_DOMAIN}
-      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}
-      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
-      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
-      NODE_FUNCTION_ALLOW_EXTERNAL: ${NODE_FUNCTION_ALLOW_EXTERNAL}
-    volumes:
-      - ./n8n-docker-data:/home/node/.n8n
-    networks:
-      - n8n-network
-    depends_on:
-      - evolution-api
+version: '3.9'
 
+services:
   evolution-api:
     image: evoapicloud/evolution-api:v2.3.1
     restart: unless-stopped
     ports:
       - "8080:8080"
-    volumes:
-      - ./evolution-docker-data:/evolution/instances
-      - /etc/localtime:/etc/localtime:ro
     environment:
       SERVER_TYPE: ${SERVER_TYPE}
       SERVER_PORT: ${SERVER_PORT}
@@ -66,11 +39,40 @@ services:
       AUTHENTICATION_API_KEY: ${AUTHENTICATION_API_KEY}
       AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: ${AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES}
       LANGUAGE: ${LANGUAGE}
+    volumes:
+      - ./evolution-docker-data:/evolution/instances
+      - /etc/localtime:/etc/localtime:ro
     networks:
-      - n8n-network
+      - loomie-network
     depends_on:
       - postgres
       - redis
+
+  n8n:
+    build: .
+    image: n8nio/n8n:1.106.3
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      N8N_HOST: ${N8N_HOST}
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      VUE_APP_N8N_PROTOCOL: ${VUE_APP_N8N_PROTOCOL}
+      VUE_APP_N8N_HOST: ${VUE_APP_N8N_HOST}
+      GENERIC_TIMEOUT: ${GENERIC_TIMEOUT}
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE}
+      N8N_COOKIE_DOMAIN: ${N8N_COOKIE_DOMAIN}
+      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+      NODE_FUNCTION_ALLOW_EXTERNAL: ${NODE_FUNCTION_ALLOW_EXTERNAL}
+    volumes:
+      - ./n8n-docker-data:/home/node/.n8n
+    networks:
+      - loomie-network
+    depends_on:
+      - evolution-api
 
   postgres:
     image: postgres:15
@@ -82,7 +84,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
-      - n8n-network
+      - loomie-network
 
   redis:
     image: redis:7-alpine
@@ -90,8 +92,8 @@ services:
     volumes:
       - ./redis-data:/data
     networks:
-      - n8n-network
+      - loomie-network
 
 networks:
-  n8n-network:
-    driver: bridge
+  loomie-network:
+    external: true
