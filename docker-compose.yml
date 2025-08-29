@@ -48,8 +48,7 @@ services:
 
   n8n:
     build: .
-    image: n8nio/n8n:1.106.3
-    command: n8n start
+    image: docker.n8n.io/n8nio/n8n
     restart: unless-stopped
     ports:
       - "5678:5678"
