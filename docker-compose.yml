@@ -48,7 +48,8 @@ services:
 
   n8n:
     build: .
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.106.3
+    command: n8n start
     restart: unless-stopped
     ports:
       - "5678:5678"
