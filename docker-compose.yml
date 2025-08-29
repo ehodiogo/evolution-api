@@ -65,7 +65,7 @@ services:
       N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
       NODE_FUNCTION_ALLOW_EXTERNAL: ${NODE_FUNCTION_ALLOW_EXTERNAL}
     volumes:
-      - ./n8n-docker-data:/home/node/.n8n
+      - n8n-docker-data:/home/node/.n8n
     networks:
       - loomie-network
     depends_on:
@@ -94,3 +94,9 @@ services:
 networks:
   loomie-network:
     external: true
+
+volumes:
+  n8n-docker-data:
+  postgres-data:
+  redis-data:
+  evolution-docker-data:
