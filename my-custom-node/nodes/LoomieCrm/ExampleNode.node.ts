@@ -9,13 +9,13 @@ import { ContatosResource } from '../../resources/ContatosResource';
 
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Example Node',
+		displayName: 'LoomieCRM Node',
 		name: 'exampleNode',
 		group: ['transform'],
 		version: 1,
-		description: 'Node com conjuntos e funções (ex: Contatos → Listar Contato)',
+		description: 'Node com funções da API LoomieCRM',
 		defaults: {
-			name: 'Example Node',
+			name: 'LoomieCRM Node',
 		},
 		inputs: ['main'],
 		outputs: ['main'],
