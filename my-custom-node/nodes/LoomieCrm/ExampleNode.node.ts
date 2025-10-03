@@ -13,28 +13,48 @@ export class ExampleNode implements INodeType {
 		name: 'exampleNode',
 		group: ['transform'],
 		version: 1,
-		description: 'Basic Example Node usando ContatosResource',
+		description: 'Node com conjuntos e funções (ex: Contatos → Listar Contato)',
 		defaults: {
 			name: 'Example Node',
 		},
 		inputs: ['main'],
 		outputs: ['main'],
-		usableAsTool: true,
 		properties: [
+			// Escolhe o conjunto (recurso)
+			{
+				displayName: 'Recurso',
+				name: 'recurso',
+				type: 'options',
+				options: [
+					{ name: 'Contatos', value: 'contatos' },
+					// Aqui você pode adicionar outros recursos no futuro
+				],
+				default: 'contatos',
+				description: 'Escolha o conjunto de funções',
+			},
+			// Escolhe a função dentro do recurso
+			{
+				displayName: 'Função',
+				name: 'funcao',
+				type: 'options',
+				options: [
+					{ name: 'Listar Contato', value: 'listarContato' },
+					// Futuras funções como criar, atualizar, deletar
+				],
+				default: 'listarContato',
+				description: 'Escolha a função a ser executada',
+				displayOptions: {
+					show: {
+						recurso: ['contatos'], // só aparece quando Contatos estiver selecionado
+					},
+				},
+			},
 			{
 				displayName: 'Auth Token',
 				name: 'authToken',
 				type: 'string',
 				default: '',
 				description: 'Token de autenticação Bearer para acessar a API',
-			},
-			{
-				displayName: 'My String',
-				name: 'myString',
-				type: 'string',
-				default: '',
-				placeholder: 'Placeholder value',
-				description: 'O texto que será adicionado aos itens',
 			},
 		],
 	};
@@ -45,18 +65,27 @@ export class ExampleNode implements INodeType {
 
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
-				const authToken = this.getNodeParameter('authToken', itemIndex, '') as string;
-				const myString = this.getNodeParameter('myString', itemIndex, '') as string;
+				const recurso = this.getNodeParameter('recurso', itemIndex) as string;
+				const funcao = this.getNodeParameter('funcao', itemIndex) as string;
+				const authToken = this.getNodeParameter('authToken', itemIndex) as string;
 
-				// Passa `this.getNode()` para o resource
-				const contatos = await ContatosResource.listarContatos(this.getNode(), authToken);
+				let resultado: any;
 
-				returnData.push({
-					json: {
-						myString,
-						contatos,
-					},
-				});
+				// Executa a função escolhida do recurso
+				if (recurso === 'contatos') {
+					if (funcao === 'listarContato') {
+						resultado = await ContatosResource.listarContatos(this.getNode(), authToken);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${funcao}" não implementada para Contatos`,
+						);
+					}
+				} else {
+					throw new NodeOperationError(this.getNode(), `Recurso "${recurso}" não implementado`);
+				}
+
+				returnData.push({ json: resultado });
 			} catch (error: any) {
 				if (this.continueOnFail()) {
 					returnData.push({ json: { error: error.message } });
