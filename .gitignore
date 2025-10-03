@@ -4,3 +4,4 @@
 /redis-data
 /evolution-docker-data
 /n8n_data
+/n8n-nodes-custom/node_modules
