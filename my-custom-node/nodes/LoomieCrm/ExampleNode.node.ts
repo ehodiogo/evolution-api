@@ -5,73 +5,67 @@ import type {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
+import { ContatosResource } from '../../resources/ContatosResource';
 
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'LoomieCRM',
+		displayName: 'Example Node',
 		name: 'exampleNode',
 		group: ['transform'],
 		version: 1,
-		description: 'Nó da LoomieCRM',
+		description: 'Basic Example Node usando ContatosResource',
 		defaults: {
-			name: 'LoomieCRM Node',
+			name: 'Example Node',
 		},
-		inputs: ["main"],
-		outputs: ["main"],
+		inputs: ['main'],
+		outputs: ['main'],
 		usableAsTool: true,
 		properties: [
-			// Node properties which the user gets displayed and
-			// can change on the node.
+			{
+				displayName: 'Auth Token',
+				name: 'authToken',
+				type: 'string',
+				default: '',
+				description: 'Token de autenticação Bearer para acessar a API',
+			},
 			{
 				displayName: 'My String',
 				name: 'myString',
 				type: 'string',
 				default: '',
 				placeholder: 'Placeholder value',
-				description: 'The description text',
+				description: 'O texto que será adicionado aos itens',
 			},
 		],
 	};
 
-	// The function below is responsible for actually doing whatever this node
-	// is supposed to do. In this case, we're just appending the `myString` property
-	// with whatever the user has entered.
-	// You can make async calls and use `await`.
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
+		const returnData: INodeExecutionData[] = [];
 
-		let item: INodeExecutionData;
-		let myString: string;
-
-		// Iterates over all input items and add the key "myString" with the
-		// value the parameter "myString" resolves to.
-		// (This could be a different value for each item in case it contains an expression)
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
-				myString = this.getNodeParameter('myString', itemIndex, '') as string;
-				item = items[itemIndex];
+				const authToken = this.getNodeParameter('authToken', itemIndex, '') as string;
+				const myString = this.getNodeParameter('myString', itemIndex, '') as string;
 
-				item.json.myString = myString;
-			} catch (error) {
-				// This node should never fail but we want to showcase how
-				// to handle errors.
+				// Passa `this.getNode()` para o resource
+				const contatos = await ContatosResource.listarContatos(this.getNode(), authToken);
+
+				returnData.push({
+					json: {
+						myString,
+						contatos,
+					},
+				});
+			} catch (error: any) {
 				if (this.continueOnFail()) {
-					items.push({ json: this.getInputData(itemIndex)[0].json, error, pairedItem: itemIndex });
+					returnData.push({ json: { error: error.message } });
 				} else {
-					// Adding `itemIndex` allows other workflows to handle this error
-					if (error.context) {
-						// If the error thrown already contains the context property,
-						// only append the itemIndex
-						error.context.itemIndex = itemIndex;
-						throw error;
-					}
-					throw new NodeOperationError(this.getNode(), error, {
-						itemIndex,
-					});
+					throw new NodeOperationError(this.getNode(), error);
 				}
 			}
 		}
 
-		return [items];
+		return [returnData];
 	}
 }
