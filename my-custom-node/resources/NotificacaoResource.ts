@@ -18,7 +18,7 @@ export class NotificacaoResource {
 			// Assumindo que a API usa 'tipo', 'texto' e 'user_id'
 			const body = { tipo, texto, user_id: userId };
 
-			const response = await fetch('https://backend.loomiecrm.com/notificacoes/', {
+			const response = await fetch('https://backend.loomiecrm.com/notificacoes/criar/', {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${authToken}`,

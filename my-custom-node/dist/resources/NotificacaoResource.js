@@ -10,7 +10,7 @@ class NotificacaoResource {
     static async criarNotificacao(node, authToken, tipo, texto, userId) {
         try {
             const body = { tipo, texto, user_id: userId };
-            const response = await (0, node_fetch_1.default)('https://backend.loomiecrm.com/notificacoes/', {
+            const response = await (0, node_fetch_1.default)('https://backend.loomiecrm.com/notificacoes/criar/', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${authToken}`,
