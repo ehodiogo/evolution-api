@@ -9,7 +9,7 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 class NotificacaoResource {
     static async criarNotificacao(node, authToken, tipo, texto, userId) {
         try {
-            const body = { tipo, texto, user_id: userId };
+            const body = { tipo, texto, usuario: userId };
             const response = await (0, node_fetch_1.default)('https://backend.loomiecrm.com/notificacoes/criar/', {
                 method: 'POST',
                 headers: {

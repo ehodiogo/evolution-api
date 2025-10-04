@@ -16,7 +16,7 @@ export class NotificacaoResource {
 		try {
 			// Os nomes das chaves no 'body' devem corresponder ao que a API espera.
 			// Assumindo que a API usa 'tipo', 'texto' e 'user_id'
-			const body = { tipo, texto, user_id: userId };
+			const body = { tipo, texto, usuario: userId };
 
 			const response = await fetch('https://backend.loomiecrm.com/notificacoes/criar/', {
 				method: 'POST',
