@@ -7,11 +7,13 @@ import type {
 import { NodeOperationError } from 'n8n-workflow';
 import { ContatosResource } from '../../resources/ContatosResource';
 import { NegociosResource } from '../../resources/NegociosResource';
+import { NotificacaoResource } from '../../resources/NotificacaoResource'; // <-- 1. NOVO IMPORT
 
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'LoomieCRM Node',
 		name: 'exampleNode',
+		icon: 'file:loomiecrm.svg',
 		group: ['transform'],
 		version: 1,
 		description: 'Node com funções da API LoomieCRM',
@@ -26,12 +28,12 @@ export class ExampleNode implements INodeType {
 				options: [
 					{ name: 'Contatos', value: 'contatos' },
 					{ name: 'Negócios', value: 'negocios' },
+					{ name: 'Notificações', value: 'notificacoes' }, // <-- Recurso de Notificação
 				],
 				default: 'contatos',
 				description: 'Escolha o conjunto de funções',
-			},
+			}, // Funções de Contatos
 
-			// Funções de Contatos
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -40,9 +42,8 @@ export class ExampleNode implements INodeType {
 				default: 'listarContato',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['contatos'] } },
-			},
+			}, // Funções de Negócios
 
-			// Funções de Negócios
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -56,7 +57,17 @@ export class ExampleNode implements INodeType {
 				default: 'criarNegocio',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['negocios'] } },
-			},
+			}, // Funções de Notificações
+
+			{
+				displayName: 'Função',
+				name: 'funcao',
+				type: 'options',
+				options: [{ name: 'Criar Notificação', value: 'criarNotificacao' }],
+				default: 'criarNotificacao',
+				description: 'Escolha a função a ser executada',
+				displayOptions: { show: { recurso: ['notificacoes'] } },
+			}, // Parâmetros Comuns/Negócios
 
 			{
 				displayName: 'Título',
@@ -82,7 +93,10 @@ export class ExampleNode implements INodeType {
 				type: 'string',
 				default: '',
 				displayOptions: {
-					show: { recurso: ['negocios'], funcao: ['criarNegocio', 'atualizarNegocio', 'trocarEstagio'] },
+					show: {
+						recurso: ['negocios'],
+						funcao: ['criarNegocio', 'atualizarNegocio', 'trocarEstagio'],
+					},
 				},
 			},
 			{
@@ -101,9 +115,50 @@ export class ExampleNode implements INodeType {
 				default: '',
 				description: 'ID do negócio para obter ou atualizar',
 				displayOptions: {
-					show: { recurso: ['negocios'], funcao: ['obterNegocio', 'atualizarNegocio', 'trocarEstagio'] },
+					show: {
+						recurso: ['negocios'],
+						funcao: ['obterNegocio', 'atualizarNegocio', 'trocarEstagio'],
+					},
+				},
+			}, // 2. NOVOS PARÂMETROS PARA NOTIFICAÇÕES (Conforme modelo Django)
+
+			{
+				displayName: 'Tipo',
+				name: 'tipo',
+				type: 'options',
+				options: [
+					{ name: 'Boa', value: 'boa' },
+					{ name: 'Alerta', value: 'alerta' },
+					{ name: 'Erro', value: 'erro' },
+					{ name: 'Informação', value: 'info' },
+				],
+				default: 'info',
+				description: 'Tipo da notificação (boa, alerta, erro, info).',
+				displayOptions: {
+					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
 				},
 			},
+			{
+				displayName: 'Texto da Notificação',
+				name: 'texto',
+				type: 'string',
+				default: '',
+				description: 'Conteúdo principal da notificação (campo "texto" no Django).',
+				displayOptions: {
+					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
+				},
+			},
+			{
+				displayName: 'ID do Usuário',
+				name: 'userId',
+				type: 'string',
+				default: '',
+				description: 'ID do usuário que receberá a notificação (campo "usuario" no Django).',
+				displayOptions: {
+					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
+				},
+			}, // Parâmetro Auth Token (permanece inalterado)
+
 			{
 				displayName: 'Auth Token',
 				name: 'authToken',
@@ -136,66 +191,84 @@ export class ExampleNode implements INodeType {
 						);
 					}
 				} else if (recurso === 'negocios') {
-						let negocioId: string;
-						let titulo: string;
-						let valor: number;
-						let estagioId: string;
-						let contatoId: string;
+					let negocioId: string;
+					let titulo: string;
+					let valor: number;
+					let estagioId: string;
+					let contatoId: string;
 
-						if (funcao === 'criarNegocio') {
-								titulo = this.getNodeParameter('titulo', itemIndex) as string;
-								valor = this.getNodeParameter('valor', itemIndex) as number;
-								estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
-								contatoId = this.getNodeParameter('contatoId', itemIndex) as string;
+					if (funcao === 'criarNegocio') {
+						titulo = this.getNodeParameter('titulo', itemIndex) as string;
+						valor = this.getNodeParameter('valor', itemIndex) as number;
+						estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
+						contatoId = this.getNodeParameter('contatoId', itemIndex) as string;
 
-								resultado = await NegociosResource.criarNegocio(
-										this.getNode(),
-										authToken,
-										titulo,
-										valor,
-										estagioId,
-										contatoId,
-								);
-						} else if (funcao === 'obterNegocio') {
-								// Only retrieve 'negocioId' for this function
-								negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
-								resultado = await NegociosResource.obterNegocio(this.getNode(), authToken, negocioId);
+						resultado = await NegociosResource.criarNegocio(
+							this.getNode(),
+							authToken,
+							titulo,
+							valor,
+							estagioId,
+							contatoId,
+						);
+					} else if (funcao === 'obterNegocio') {
+						// Only retrieve 'negocioId' for this function
+						negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
+						resultado = await NegociosResource.obterNegocio(this.getNode(), authToken, negocioId);
+					} else if (funcao === 'atualizarNegocio') {
+						// Retrieve only the parameters displayed for this function
+						negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
+						titulo = this.getNodeParameter('titulo', itemIndex, undefined) as string; // Use default value (undefined) for optional parameters
+						valor = this.getNodeParameter('valor', itemIndex, undefined) as number;
+						estagioId = this.getNodeParameter('estagioId', itemIndex, undefined) as string;
+						contatoId = this.getNodeParameter('contatoId', itemIndex, undefined) as string;
 
-						} else if (funcao === 'atualizarNegocio') {
-								// Retrieve only the parameters displayed for this function
-								negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
-								titulo = this.getNodeParameter('titulo', itemIndex, undefined) as string; // Use default value (undefined) for optional parameters
-								valor = this.getNodeParameter('valor', itemIndex, undefined) as number;
-								estagioId = this.getNodeParameter('estagioId', itemIndex, undefined) as string;
-								contatoId = this.getNodeParameter('contatoId', itemIndex, undefined) as string;
+						resultado = await NegociosResource.editarNegocio(
+							this.getNode(),
+							authToken,
+							negocioId,
+							titulo,
+							valor,
+							estagioId,
+							contatoId,
+						);
+					} else if (funcao === 'trocarEstagio') {
+						// Only retrieve 'negocioId' and 'estagioId' for this function
+						negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
+						estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
 
-								resultado = await NegociosResource.editarNegocio(
-										this.getNode(),
-										authToken,
-										negocioId,
-										titulo,
-										valor,
-										estagioId,
-										contatoId,
-								);
-						}
-						else if (funcao === 'trocarEstagio') {
-								// Only retrieve 'negocioId' and 'estagioId' for this function
-								negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
-								estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
+						resultado = await NegociosResource.trocarEstagio(
+							this.getNode(),
+							authToken,
+							negocioId,
+							estagioId,
+						);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${funcao}" não implementada para Negócios`,
+						);
+					}
+				} else if (recurso === 'notificacoes') {
+					// <-- 3. LÓGICA DE EXECUÇÃO
+					if (funcao === 'criarNotificacao') {
+						const tipo = this.getNodeParameter('tipo', itemIndex) as string;
+						const texto = this.getNodeParameter('texto', itemIndex) as string;
+						const userId = this.getNodeParameter('userId', itemIndex) as string;
 
-								resultado = await NegociosResource.trocarEstagio(
-										this.getNode(),
-										authToken,
-										negocioId,
-										estagioId,
-								);
-						} else {
-								throw new NodeOperationError(
-										this.getNode(),
-										`Função "${funcao}" não implementada para Negócios`,
-								);
-						}
+						resultado = await NotificacaoResource.criarNotificacao(
+							this.getNode(),
+							authToken,
+							tipo,
+							texto,
+							userId,
+						);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${funcao}" não implementada para Notificações`,
+						);
+					}
 				} else {
 					throw new NodeOperationError(this.getNode(), `Recurso "${recurso}" não implementado`);
 				}
