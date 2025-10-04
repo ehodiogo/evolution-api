@@ -7,7 +7,9 @@ import type {
 import { NodeOperationError } from 'n8n-workflow';
 import { ContatosResource } from '../../resources/ContatosResource';
 import { NegociosResource } from '../../resources/NegociosResource';
-import { NotificacaoResource } from '../../resources/NotificacaoResource'; // <-- 1. NOVO IMPORT
+import { NotificacaoResource } from '../../resources/NotificacaoResource';
+import { NotasResource } from '../../resources/NotasResource';
+import { AtributosResource } from '../../resources/AtributosResource'; // <-- 1. NOVO IMPORT
 
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -28,11 +30,13 @@ export class ExampleNode implements INodeType {
 				options: [
 					{ name: 'Contatos', value: 'contatos' },
 					{ name: 'Negócios', value: 'negocios' },
-					{ name: 'Notificações', value: 'notificacoes' }, // <-- Recurso de Notificação
+					{ name: 'Notificações', value: 'notificacoes' },
+					{ name: 'Notas de Atendimento', value: 'notas' },
+					{ name: 'Atributos Personalizados', value: 'atributos' }, // <-- NOVO RECURSO
 				],
 				default: 'contatos',
 				description: 'Escolha o conjunto de funções',
-			}, // Funções de Contatos
+			},
 
 			{
 				displayName: 'Função',
@@ -67,6 +71,28 @@ export class ExampleNode implements INodeType {
 				default: 'criarNotificacao',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['notificacoes'] } },
+			},
+
+			// Funções de Notas de Atendimento
+			{
+				displayName: 'Função',
+				name: 'funcao',
+				type: 'options',
+				options: [{ name: 'Criar Nota', value: 'criarNota' }],
+				default: 'criarNota',
+				description: 'Escolha a função a ser executada',
+				displayOptions: { show: { recurso: ['notas'] } },
+			},
+
+			// Funções de Atributos Personalizados
+			{
+				displayName: 'Função',
+				name: 'funcao',
+				type: 'options',
+				options: [{ name: 'Criar Atributo', value: 'criarAtributo' }], // <-- NOVA FUNÇÃO
+				default: 'criarAtributo',
+				description: 'Escolha a função a ser executada',
+				displayOptions: { show: { recurso: ['atributos'] } },
 			}, // Parâmetros Comuns/Negócios
 
 			{
@@ -113,14 +139,14 @@ export class ExampleNode implements INodeType {
 				name: 'negocioId',
 				type: 'string',
 				default: '',
-				description: 'ID do negócio para obter ou atualizar',
+				description: 'ID do negócio para obter, atualizar ou anexar atributos.',
 				displayOptions: {
 					show: {
-						recurso: ['negocios'],
-						funcao: ['obterNegocio', 'atualizarNegocio', 'trocarEstagio'],
+						recurso: ['negocios', 'atributos'], // <-- Adicionado 'atributos'
+						funcao: ['obterNegocio', 'atualizarNegocio', 'trocarEstagio', 'criarAtributo'], // <-- Adicionado 'criarAtributo'
 					},
 				},
-			}, // 2. NOVOS PARÂMETROS PARA NOTIFICAÇÕES (Conforme modelo Django)
+			}, // Parâmetros para Notificações
 
 			{
 				displayName: 'Tipo',
@@ -157,7 +183,105 @@ export class ExampleNode implements INodeType {
 				displayOptions: {
 					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
 				},
-			}, // Parâmetro Auth Token (permanece inalterado)
+			}, // Parâmetros para Notas de Atendimento
+
+			// Funções de Notas de Atendimento (propriedade 'funcao' já existe, apenas adicionando campos)
+			{
+				displayName: 'Título da Nota',
+				name: 'notaTitulo',
+				type: 'string',
+				default: '',
+				description: 'Título da nota de atendimento',
+				displayOptions: {
+					show: { recurso: ['notas'], funcao: ['criarNota'] },
+				},
+			},
+			{
+				displayName: 'Conteúdo da Nota',
+				name: 'conteudo',
+				type: 'string',
+				typeOptions: {
+					multiline: true,
+				},
+				default: '',
+				description: 'Conteúdo detalhado da nota de atendimento',
+				displayOptions: {
+					show: { recurso: ['notas'], funcao: ['criarNota'] },
+				},
+			},
+			{
+				displayName: 'Tipo da Nota',
+				name: 'notaTipo',
+				type: 'options',
+				options: [
+					{ name: 'Informação', value: 'info' },
+					{ name: 'Importante', value: 'importante' },
+					{ name: 'Urgente', value: 'urgente' },
+					{ name: 'Follow-up', value: 'followup' },
+					{ name: 'Problema', value: 'problema' },
+					{ name: 'Solução', value: 'solucao' },
+				],
+				default: 'Informação',
+				description: 'Tipo da nota de atendimento.',
+				displayOptions: {
+					show: { recurso: ['notas'], funcao: ['criarNota'] },
+				},
+			},
+			{
+				displayName: 'ID da Conversa (Opcional)',
+				name: 'conversaId',
+				type: 'string',
+				default: '',
+				description: 'ID da conversa à qual a nota deve ser anexada (opcional).',
+				displayOptions: {
+					show: { recurso: ['notas'], funcao: ['criarNota'] },
+				},
+			},
+
+			// <-- 2. NOVOS PARÂMETROS PARA ATRIBUTOS PERSONALIZADOS
+
+			{
+				displayName: 'Label (Rótulo)',
+				name: 'label',
+				type: 'string',
+				default: '',
+				description: 'O nome do atributo (ex: "Cor Favorita").',
+				displayOptions: {
+					show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
+				},
+			},
+
+			{
+				displayName: 'Valor',
+				name: 'atributoValor', // Renomeado para evitar conflito com 'valor' de Negócio
+				type: 'string',
+				default: '',
+				description: 'O valor do atributo (ex: "Azul" ou "100"). Deve ser string.',
+				displayOptions: {
+					show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
+				},
+			},
+
+			{
+				displayName: 'Tipo de Dado',
+				name: 'atributoType',
+				type: 'options',
+				options: [
+					{ name: 'Boolean', value: 'boolean' },
+					{ name: 'Integer', value: 'integer' },
+					{ name: 'Float', value: 'float' },
+					{ name: 'String', value: 'string' },
+					{ name: 'Date', value: 'date' },
+					{ name: 'DateTime', value: 'datetime' },
+					{ name: 'Time', value: 'time' },
+					{ name: 'Text', value: 'text' },
+				],
+				default: 'string',
+				description: 'O tipo de dado armazenado (string, integer, date, etc.).',
+				displayOptions: {
+					show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
+				},
+			},// Parâmetro Auth Token
 
 			{
 				displayName: 'Auth Token',
@@ -250,7 +374,6 @@ export class ExampleNode implements INodeType {
 						);
 					}
 				} else if (recurso === 'notificacoes') {
-					// <-- 3. LÓGICA DE EXECUÇÃO
 					if (funcao === 'criarNotificacao') {
 						const tipo = this.getNodeParameter('tipo', itemIndex) as string;
 						const texto = this.getNodeParameter('texto', itemIndex) as string;
@@ -267,6 +390,51 @@ export class ExampleNode implements INodeType {
 						throw new NodeOperationError(
 							this.getNode(),
 							`Função "${funcao}" não implementada para Notificações`,
+						);
+					}
+				} else if (recurso === 'notas') {
+					if (funcao === 'criarNota') {
+						const notaTitulo = this.getNodeParameter('notaTitulo', itemIndex) as string;
+						const conteudo = this.getNodeParameter('conteudo', itemIndex) as string;
+						const notaTipo = this.getNodeParameter('notaTipo', itemIndex) as string; // conversaId é opcional, então passamos o default
+						const conversaId = this.getNodeParameter('conversaId', itemIndex, undefined) as
+							| string
+							| undefined;
+
+						resultado = await NotasResource.criarNotaAtendimento(
+							this.getNode(),
+							authToken,
+							notaTitulo,
+							conteudo,
+							notaTipo,
+							conversaId, // Pode ser undefined
+						);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${funcao}" não implementada para Notas de Atendimento`,
+						);
+					}
+				} else if (recurso === 'atributos') {
+					// <-- 3. NOVO BLOCO DE LÓGICA
+					if (funcao === 'criarAtributo') {
+						const negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
+						const label = this.getNodeParameter('label', itemIndex) as string;
+						const atributoValor = this.getNodeParameter('atributoValor', itemIndex) as string;
+						const atributoType = this.getNodeParameter('atributoType', itemIndex) as string;
+
+						resultado = await AtributosResource.criarAtributoPersonalizavel(
+							this.getNode(),
+							authToken,
+							negocioId,
+							label,
+							atributoValor,
+							atributoType,
+						);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${funcao}" não implementada para Atributos Personalizados`,
 						);
 					}
 				} else {
@@ -286,3 +454,4 @@ export class ExampleNode implements INodeType {
 		return [returnData];
 	}
 }
+
