@@ -15,9 +15,7 @@ export class ExampleNode implements INodeType {
 		group: ['transform'],
 		version: 1,
 		description: 'Node com funções da API LoomieCRM',
-		defaults: {
-			name: 'LoomieCRM Node',
-		},
+		defaults: { name: 'LoomieCRM Node' },
 		inputs: ['main'],
 		outputs: ['main'],
 		properties: [
@@ -32,7 +30,8 @@ export class ExampleNode implements INodeType {
 				default: 'contatos',
 				description: 'Escolha o conjunto de funções',
 			},
-			// funções de Contatos
+
+			// Funções de Contatos
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -40,40 +39,32 @@ export class ExampleNode implements INodeType {
 				options: [{ name: 'Listar Contato', value: 'listarContato' }],
 				default: 'listarContato',
 				description: 'Escolha a função a ser executada',
-				displayOptions: {
-					show: {
-						recurso: ['contatos'],
-					},
-				},
+				displayOptions: { show: { recurso: ['contatos'] } },
 			},
+
 			// Funções de Negócios
 			{
 				displayName: 'Função',
 				name: 'funcao',
 				type: 'options',
 				options: [
-					{ name: 'Criar Negócio', value: 'criarNegocio', description: 'Cria um novo negócio' },
+					{ name: 'Criar Negócio', value: 'criarNegocio' },
+					{ name: 'Obter Negócio', value: 'obterNegocio' },
+					{ name: 'Atualizar Negócio', value: 'atualizarNegocio' },
+					{ name: 'Trocar Estágio', value: 'trocarEstagio' },
 				],
 				default: 'criarNegocio',
 				description: 'Escolha a função a ser executada',
-				displayOptions: {
-					show: {
-						recurso: ['negocios'],
-					},
-				},
+				displayOptions: { show: { recurso: ['negocios'] } },
 			},
-			// Campos específicos para criar negócio
+
 			{
 				displayName: 'Título',
 				name: 'titulo',
 				type: 'string',
 				default: '',
-				description: 'Título do negócio',
 				displayOptions: {
-					show: {
-						recurso: ['negocios'],
-						funcao: ['criarNegocio'],
-					},
+					show: { recurso: ['negocios'], funcao: ['criarNegocio', 'atualizarNegocio'] },
 				},
 			},
 			{
@@ -81,12 +72,8 @@ export class ExampleNode implements INodeType {
 				name: 'valor',
 				type: 'number',
 				default: 0,
-				description: 'Valor do negócio',
 				displayOptions: {
-					show: {
-						recurso: ['negocios'],
-						funcao: ['criarNegocio'],
-					},
+					show: { recurso: ['negocios'], funcao: ['criarNegocio', 'atualizarNegocio'] },
 				},
 			},
 			{
@@ -94,12 +81,8 @@ export class ExampleNode implements INodeType {
 				name: 'estagioId',
 				type: 'string',
 				default: '',
-				description: 'ID do estágio do negócio',
 				displayOptions: {
-					show: {
-						recurso: ['negocios'],
-						funcao: ['criarNegocio'],
-					},
+					show: { recurso: ['negocios'], funcao: ['criarNegocio', 'atualizarNegocio', 'trocarEstagio'] },
 				},
 			},
 			{
@@ -107,12 +90,18 @@ export class ExampleNode implements INodeType {
 				name: 'contatoId',
 				type: 'string',
 				default: '',
-				description: 'ID do contato relacionado ao negócio',
 				displayOptions: {
-					show: {
-						recurso: ['negocios'],
-						funcao: ['criarNegocio'],
-					},
+					show: { recurso: ['negocios'], funcao: ['criarNegocio', 'atualizarNegocio'] },
+				},
+			},
+			{
+				displayName: 'ID do Negócio',
+				name: 'negocioId',
+				type: 'string',
+				default: '',
+				description: 'ID do negócio para obter ou atualizar',
+				displayOptions: {
+					show: { recurso: ['negocios'], funcao: ['obterNegocio', 'atualizarNegocio', 'trocarEstagio'] },
 				},
 			},
 			{
@@ -147,26 +136,66 @@ export class ExampleNode implements INodeType {
 						);
 					}
 				} else if (recurso === 'negocios') {
-					if (funcao === 'criarNegocio') {
-						const titulo = this.getNodeParameter('titulo', itemIndex) as string;
-						const valor = this.getNodeParameter('valor', itemIndex) as number;
-						const estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
-						const contatoId = this.getNodeParameter('contatoId', itemIndex) as string;
+						let negocioId: string;
+						let titulo: string;
+						let valor: number;
+						let estagioId: string;
+						let contatoId: string;
 
-						resultado = await NegociosResource.criarNegocio(
-							this.getNode(),
-							authToken,
-							titulo,
-							valor,
-							estagioId,
-							contatoId,
-						);
-					} else {
-						throw new NodeOperationError(
-							this.getNode(),
-							`Função "${funcao}" não implementada para Negócios`,
-						);
-					}
+						if (funcao === 'criarNegocio') {
+								titulo = this.getNodeParameter('titulo', itemIndex) as string;
+								valor = this.getNodeParameter('valor', itemIndex) as number;
+								estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
+								contatoId = this.getNodeParameter('contatoId', itemIndex) as string;
+
+								resultado = await NegociosResource.criarNegocio(
+										this.getNode(),
+										authToken,
+										titulo,
+										valor,
+										estagioId,
+										contatoId,
+								);
+						} else if (funcao === 'obterNegocio') {
+								// Only retrieve 'negocioId' for this function
+								negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
+								resultado = await NegociosResource.obterNegocio(this.getNode(), authToken, negocioId);
+
+						} else if (funcao === 'atualizarNegocio') {
+								// Retrieve only the parameters displayed for this function
+								negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
+								titulo = this.getNodeParameter('titulo', itemIndex, undefined) as string; // Use default value (undefined) for optional parameters
+								valor = this.getNodeParameter('valor', itemIndex, undefined) as number;
+								estagioId = this.getNodeParameter('estagioId', itemIndex, undefined) as string;
+								contatoId = this.getNodeParameter('contatoId', itemIndex, undefined) as string;
+
+								resultado = await NegociosResource.editarNegocio(
+										this.getNode(),
+										authToken,
+										negocioId,
+										titulo,
+										valor,
+										estagioId,
+										contatoId,
+								);
+						}
+						else if (funcao === 'trocarEstagio') {
+								// Only retrieve 'negocioId' and 'estagioId' for this function
+								negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
+								estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
+
+								resultado = await NegociosResource.trocarEstagio(
+										this.getNode(),
+										authToken,
+										negocioId,
+										estagioId,
+								);
+						} else {
+								throw new NodeOperationError(
+										this.getNode(),
+										`Função "${funcao}" não implementada para Negócios`,
+								);
+						}
 				} else {
 					throw new NodeOperationError(this.getNode(), `Recurso "${recurso}" não implementado`);
 				}
