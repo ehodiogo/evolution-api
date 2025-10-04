@@ -207,7 +207,7 @@ class ExampleNode {
                         { name: 'Problema', value: 'problema' },
                         { name: 'Solução', value: 'solucao' },
                     ],
-                    default: 'Informação',
+                    default: 'info',
                     description: 'Tipo da nota de atendimento.',
                     displayOptions: {
                         show: { recurso: ['notas'], funcao: ['criarNota'] },
