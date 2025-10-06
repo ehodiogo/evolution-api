@@ -19,6 +19,7 @@ class ExampleNode {
             defaults: { name: 'LoomieCRM Node' },
             inputs: ['main'],
             outputs: ['main'],
+            usableAsTool: true,
             tool: {
                 description: 'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; e criar atributos personalizados para negócios. É a ferramenta central para qualquer ação de CRM.',
             },

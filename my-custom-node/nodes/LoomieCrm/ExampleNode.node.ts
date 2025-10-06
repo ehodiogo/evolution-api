@@ -22,6 +22,7 @@ export class ExampleNode implements INodeType {
 		defaults: { name: 'LoomieCRM Node' },
 		inputs: ['main'],
 		outputs: ['main'],
+		usableAsTool: true,
 		// @ts-expect-error: n8n AI Tool property
 		tool: {
 			description:
