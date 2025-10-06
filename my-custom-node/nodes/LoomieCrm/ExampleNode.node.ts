@@ -63,6 +63,7 @@ export class ExampleNode implements INodeType {
 					{ name: 'Obter Negócio', value: 'obterNegocio' },
 					{ name: 'Atualizar Negócio', value: 'atualizarNegocio' },
 					{ name: 'Trocar Estágio', value: 'trocarEstagio' },
+					{ name: 'Listar Negócios por Estágio', value: 'listarNegociosPorEstagio' },
 				],
 				default: 'criarNegocio',
 				description: 'Escolha a função a ser executada',
@@ -101,6 +102,26 @@ export class ExampleNode implements INodeType {
 				displayOptions: { show: { recurso: ['atributos'] } },
 			}, // Parâmetros Comuns/Negócios
 
+			{
+				displayName: 'ID do Kanban',
+				name: 'kanbanId',
+				type: 'string',
+				default: '',
+				description: 'ID do Kanban',
+				displayOptions: {
+					show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+				},
+			},
+			{
+				displayName: 'ID do Estágio',
+				name: 'estagioId',
+				type: 'string',
+				default: '',
+				description: 'ID do estágio',
+				displayOptions: {
+					show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+				},
+			},
 			{
 				displayName: 'Título',
 				name: 'titulo',
@@ -363,7 +384,6 @@ export class ExampleNode implements INodeType {
 							contatoId,
 						);
 					} else if (funcao === 'trocarEstagio') {
-						// Only retrieve 'negocioId' and 'estagioId' for this function
 						negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
 						estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
 
@@ -371,6 +391,16 @@ export class ExampleNode implements INodeType {
 							this.getNode(),
 							authToken,
 							negocioId,
+							estagioId,
+						);
+					} else if (funcao === 'listarNegociosPorEstagio') {
+						const kanbanId = this.getNodeParameter('kanbanId', itemIndex) as string;
+						const estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
+
+						resultado = await NegociosResource.obterNegociosPorEstagio(
+							this.getNode(),
+							authToken,
+							kanbanId,
 							estagioId,
 						);
 					} else {

@@ -126,4 +126,35 @@ export class NegociosResource {
 			undefined,
 		);
 	}
+
+	static async obterNegociosPorEstagio(
+		node: INode,
+		authToken: string,
+		kanbanId: string,
+		estagioId: string,
+	): Promise<any> {
+		try {
+			const response = await fetch(
+				`https://backend.loomiecrm.com/kanban/${kanbanId}/estagio/${estagioId}/negocios/`,
+				{
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${authToken}`,
+						'Content-Type': 'application/json',
+					},
+				},
+			);
+
+			if (!response.ok) {
+				throw new NodeOperationError(
+					node,
+					`Erro na API: ${response.status} ${response.statusText}`,
+				);
+			}
+
+			return await response.json();
+		} catch (error: any) {
+			throw new NodeOperationError(node, `Falha ao obter negócios por estágio: ${error.message}`);
+		}
+	}
 }

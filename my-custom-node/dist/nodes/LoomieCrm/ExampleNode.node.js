@@ -56,6 +56,7 @@ class ExampleNode {
                         { name: 'Obter Negócio', value: 'obterNegocio' },
                         { name: 'Atualizar Negócio', value: 'atualizarNegocio' },
                         { name: 'Trocar Estágio', value: 'trocarEstagio' },
+                        { name: 'Listar Negócios por Estágio', value: 'listarNegociosPorEstagio' },
                     ],
                     default: 'criarNegocio',
                     description: 'Escolha a função a ser executada',
@@ -87,6 +88,26 @@ class ExampleNode {
                     default: 'criarAtributo',
                     description: 'Escolha a função a ser executada',
                     displayOptions: { show: { recurso: ['atributos'] } },
+                },
+                {
+                    displayName: 'ID do Kanban',
+                    name: 'kanbanId',
+                    type: 'string',
+                    default: '',
+                    description: 'ID do Kanban',
+                    displayOptions: {
+                        show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+                    },
+                },
+                {
+                    displayName: 'ID do Estágio',
+                    name: 'estagioId',
+                    type: 'string',
+                    default: '',
+                    description: 'ID do estágio',
+                    displayOptions: {
+                        show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+                    },
                 },
                 {
                     displayName: 'Título',
@@ -323,6 +344,11 @@ class ExampleNode {
                         negocioId = this.getNodeParameter('negocioId', itemIndex);
                         estagioId = this.getNodeParameter('estagioId', itemIndex);
                         resultado = await NegociosResource_1.NegociosResource.trocarEstagio(this.getNode(), authToken, negocioId, estagioId);
+                    }
+                    else if (funcao === 'listarNegociosPorEstagio') {
+                        const kanbanId = this.getNodeParameter('kanbanId', itemIndex);
+                        const estagioId = this.getNodeParameter('estagioId', itemIndex);
+                        resultado = await NegociosResource_1.NegociosResource.obterNegociosPorEstagio(this.getNode(), authToken, kanbanId, estagioId);
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Negócios`);

@@ -4,4 +4,5 @@ export declare class NegociosResource {
     static obterNegocio(node: INode, authToken: string, negocioId: string): Promise<any>;
     static editarNegocio(node: INode, authToken: string, negocioId: string, titulo?: string, valor?: number, estagioId?: string, contatoId?: string): Promise<any>;
     static trocarEstagio(node: INode, authToken: string, negocioId: string, novoEstagioId: string): Promise<any>;
+    static obterNegociosPorEstagio(node: INode, authToken: string, kanbanId: string, estagioId: string): Promise<any>;
 }

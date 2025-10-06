@@ -76,6 +76,24 @@ class NegociosResource {
     static async trocarEstagio(node, authToken, negocioId, novoEstagioId) {
         return this.editarNegocio(node, authToken, negocioId, undefined, undefined, novoEstagioId, undefined);
     }
+    static async obterNegociosPorEstagio(node, authToken, kanbanId, estagioId) {
+        try {
+            const response = await (0, node_fetch_1.default)(`https://backend.loomiecrm.com/kanban/${kanbanId}/estagio/${estagioId}/negocios/`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new n8n_workflow_1.NodeOperationError(node, `Erro na API: ${response.status} ${response.statusText}`);
+            }
+            return await response.json();
+        }
+        catch (error) {
+            throw new n8n_workflow_1.NodeOperationError(node, `Falha ao obter negócios por estágio: ${error.message}`);
+        }
+    }
 }
 exports.NegociosResource = NegociosResource;
 //# sourceMappingURL=NegociosResource.js.map
