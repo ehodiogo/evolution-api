@@ -1,15 +1,15 @@
-import type {
+import {
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
-	INodeTypeDescription,
+	INodeTypeDescription
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import { ContatosResource } from '../../resources/ContatosResource';
 import { NegociosResource } from '../../resources/NegociosResource';
 import { NotificacaoResource } from '../../resources/NotificacaoResource';
 import { NotasResource } from '../../resources/NotasResource';
-import { AtributosResource } from '../../resources/AtributosResource'; // <-- 1. NOVO IMPORT
+import { AtributosResource } from '../../resources/AtributosResource';
 
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -22,6 +22,11 @@ export class ExampleNode implements INodeType {
 		defaults: { name: 'LoomieCRM Node' },
 		inputs: ['main'],
 		outputs: ['main'],
+		// @ts-expect-error: n8n AI Tool property
+		tool: {
+			description:
+				'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; e criar atributos personalizados para negócios. É a ferramenta central para qualquer ação de CRM.',
+		},
 		properties: [
 			{
 				displayName: 'Recurso',
@@ -281,7 +286,7 @@ export class ExampleNode implements INodeType {
 				displayOptions: {
 					show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
 				},
-			},// Parâmetro Auth Token
+			}, // Parâmetro Auth Token
 
 			{
 				displayName: 'Auth Token',
