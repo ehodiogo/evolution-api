@@ -94,6 +94,36 @@ class NegociosResource {
             throw new n8n_workflow_1.NodeOperationError(node, `Falha ao obter negócios por estágio: ${error.message}`);
         }
     }
+    static async buscarNegocioPorTelefone(node, authToken, telefone, kanbanId, estagioId) {
+        try {
+            let url = `https://backend.loomiecrm.com/buscar-por-telefone/?telefone=${telefone}`;
+            if (kanbanId) {
+                url += `&kanban_id=${kanbanId}`;
+            }
+            if (estagioId) {
+                url += `&estagio_id=${estagioId}`;
+            }
+            const response = await (0, node_fetch_1.default)(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                const responseData = (await response.json());
+                const errorMessage = responseData.error || `${response.status} ${response.statusText}`;
+                if (response.status === 404) {
+                    throw new n8n_workflow_1.NodeOperationError(node, `Busca de Negócio: ${errorMessage}`);
+                }
+                throw new n8n_workflow_1.NodeOperationError(node, `Erro na API: ${errorMessage}`);
+            }
+            return await response.json();
+        }
+        catch (error) {
+            throw new n8n_workflow_1.NodeOperationError(node, `Falha ao buscar negócio por telefone: ${error.message}`);
+        }
+    }
 }
 exports.NegociosResource = NegociosResource;
 //# sourceMappingURL=NegociosResource.js.map

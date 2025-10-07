@@ -60,6 +60,7 @@ class ExampleNode {
                         { name: 'Atualizar Negócio', value: 'atualizarNegocio' },
                         { name: 'Trocar Estágio', value: 'trocarEstagio' },
                         { name: 'Listar Negócios por Estágio', value: 'listarNegociosPorEstagio' },
+                        { name: 'Buscar Negócio por Telefone', value: 'buscarNegocioPorTelefone' },
                     ],
                     default: 'criarNegocio',
                     description: 'Escolha a função a ser executada',
@@ -99,7 +100,10 @@ class ExampleNode {
                     default: '',
                     description: 'ID do Kanban',
                     displayOptions: {
-                        show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+                        show: {
+                            recurso: ['negocios'],
+                            funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'],
+                        },
                     },
                 },
                 {
@@ -109,7 +113,7 @@ class ExampleNode {
                     default: '',
                     description: 'ID do estágio',
                     displayOptions: {
-                        show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+                        show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'] },
                     },
                 },
                 {
@@ -381,6 +385,16 @@ class ExampleNode {
                     displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
                 },
                 {
+                    displayName: 'Telefone/WhatsApp ID',
+                    name: 'telefone',
+                    type: 'string',
+                    default: '',
+                    description: 'Telefone ou WhatsApp ID do contato para buscar o negócio.',
+                    displayOptions: {
+                        show: { recurso: ['negocios'], funcao: ['buscarNegocioPorTelefone'] },
+                    },
+                },
+                {
                     displayName: 'Auth Token',
                     name: 'authToken',
                     type: 'string',
@@ -455,6 +469,12 @@ class ExampleNode {
                         const kanbanId = this.getNodeParameter('kanbanId', itemIndex);
                         const estagioId = this.getNodeParameter('estagioId', itemIndex);
                         resultado = await NegociosResource_1.NegociosResource.obterNegociosPorEstagio(this.getNode(), authToken, kanbanId, estagioId);
+                    }
+                    else if (funcao === 'buscarNegocioPorTelefone') {
+                        const telefone = this.getNodeParameter('telefone', itemIndex);
+                        const kanbanId = this.getNodeParameter('kanbanId', itemIndex, undefined);
+                        const estagioId = this.getNodeParameter('estagioId', itemIndex, undefined);
+                        resultado = await NegociosResource_1.NegociosResource.buscarNegocioPorTelefone(this.getNode(), authToken, telefone, kanbanId, estagioId);
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Negócios`);

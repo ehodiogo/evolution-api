@@ -66,6 +66,7 @@ export class ExampleNode implements INodeType {
 					{ name: 'Atualizar Negócio', value: 'atualizarNegocio' },
 					{ name: 'Trocar Estágio', value: 'trocarEstagio' },
 					{ name: 'Listar Negócios por Estágio', value: 'listarNegociosPorEstagio' },
+					{ name: 'Buscar Negócio por Telefone', value: 'buscarNegocioPorTelefone' },
 				],
 				default: 'criarNegocio',
 				description: 'Escolha a função a ser executada',
@@ -109,7 +110,10 @@ export class ExampleNode implements INodeType {
 				default: '',
 				description: 'ID do Kanban',
 				displayOptions: {
-					show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+					show: {
+						recurso: ['negocios'],
+						funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'],
+					},
 				},
 			},
 			{
@@ -119,7 +123,7 @@ export class ExampleNode implements INodeType {
 				default: '',
 				description: 'ID do estágio',
 				displayOptions: {
-					show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio'] },
+					show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'] },
 				},
 			},
 			{
@@ -399,6 +403,17 @@ export class ExampleNode implements INodeType {
 			},
 
 			{
+				displayName: 'Telefone/WhatsApp ID',
+				name: 'telefone',
+				type: 'string',
+				default: '',
+				description: 'Telefone ou WhatsApp ID do contato para buscar o negócio.',
+				displayOptions: {
+					show: { recurso: ['negocios'], funcao: ['buscarNegocioPorTelefone'] }, // <-- Mostrar apenas nesta função
+				},
+			},
+
+			{
 				displayName: 'Auth Token',
 				name: 'authToken',
 				type: 'string',
@@ -522,6 +537,22 @@ export class ExampleNode implements INodeType {
 						resultado = await NegociosResource.obterNegociosPorEstagio(
 							this.getNode(),
 							authToken,
+							kanbanId,
+							estagioId,
+						);
+					} else if (funcao === 'buscarNegocioPorTelefone') {
+						const telefone = this.getNodeParameter('telefone', itemIndex) as string;
+						const kanbanId = this.getNodeParameter('kanbanId', itemIndex, undefined) as
+							| string
+							| undefined;
+						const estagioId = this.getNodeParameter('estagioId', itemIndex, undefined) as
+							| string
+							| undefined;
+
+						resultado = await NegociosResource.buscarNegocioPorTelefone(
+							this.getNode(),
+							authToken,
+							telefone,
 							kanbanId,
 							estagioId,
 						);

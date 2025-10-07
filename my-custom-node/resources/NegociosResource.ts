@@ -157,4 +157,51 @@ export class NegociosResource {
 			throw new NodeOperationError(node, `Falha ao obter negócios por estágio: ${error.message}`);
 		}
 	}
+
+	static async buscarNegocioPorTelefone(
+		node: INode,
+		authToken: string,
+		telefone: string,
+		kanbanId?: string,
+		estagioId?: string,
+	): Promise<any> {
+		try {
+			// Constrói a URL com os parâmetros de consulta
+			let url = `https://backend.loomiecrm.com/buscar-por-telefone/?telefone=${telefone}`;
+
+			if (kanbanId) {
+				url += `&kanban_id=${kanbanId}`;
+			}
+
+			if (estagioId) {
+				url += `&estagio_id=${estagioId}`;
+			}
+
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${authToken}`,
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				const responseData = (await response.json()) as any;
+				const errorMessage = responseData.error || `${response.status} ${response.statusText}`;
+
+				// Trata o erro 404 de "Não Encontrado" de forma mais amigável
+				if (response.status === 404) {
+					// Retorna um array vazio ou uma mensagem de erro específica, dependendo do que o n8n precisa
+					// Neste caso, vou retornar o erro específico para manter a rastreabilidade
+					throw new NodeOperationError(node, `Busca de Negócio: ${errorMessage}`);
+				}
+
+				throw new NodeOperationError(node, `Erro na API: ${errorMessage}`);
+			}
+
+			return await response.json();
+		} catch (error: any) {
+			throw new NodeOperationError(node, `Falha ao buscar negócio por telefone: ${error.message}`);
+		}
+	}
 }
