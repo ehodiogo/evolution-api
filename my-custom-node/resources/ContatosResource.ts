@@ -26,4 +26,75 @@ export class ContatosResource {
 			throw new NodeOperationError(node, `Falha ao listar contatos: ${error.message}`);
 		}
 	}
+
+	static async criarContato(
+		node: INode,
+		authToken: string,
+		nome: string,
+		email: string,
+		telefone: string,
+		empresa: string, // Novo
+		cargo: string, // Novo
+		endereco: string, // Novo
+		cidade: string, // Novo
+		estado: string, // Novo
+		cep: string, // Novo
+		data_nascimento: string, // Novo
+		observacoes: string, // Novo
+	): Promise<any> {
+		try {
+			// Cria um objeto para o corpo da requisição
+			const bodyPayload: any = {
+				nome: nome,
+				email: email,
+				telefone: telefone,
+				empresa: empresa,
+				cargo: cargo,
+				endereco: endereco,
+				cidade: cidade,
+				estado: estado,
+				cep: cep,
+				observacoes: observacoes,
+				// Inclui data_nascimento somente se tiver valor, assumindo que pode ser opcional
+			};
+
+			if (data_nascimento) {
+				bodyPayload.data_nascimento = data_nascimento;
+			}
+
+			const body = JSON.stringify(bodyPayload);
+
+			const response = await fetch('https://backend.loomiecrm.com/contatos/', {
+				method: 'POST', // Método POST para criar
+				headers: {
+					Authorization: `Bearer ${authToken}`,
+					'Content-Type': 'application/json',
+				},
+				body: body,
+			});
+
+			if (!response.ok) {
+				let errorMessage = `Erro na API: ${response.status} ${response.statusText}`;
+				try {
+					const errorJson = await response.json();
+					// Tenta extrair mensagem de erro mais detalhada, especialmente erros de validação
+					if (typeof errorJson === 'object' && errorJson !== null && 'detail' in errorJson) {
+						errorMessage = (errorJson as { detail?: string }).detail || JSON.stringify(errorJson);
+					} else {
+						errorMessage = JSON.stringify(errorJson);
+					}
+				} catch {}
+
+				throw new NodeOperationError(node, `Falha ao criar contato: ${errorMessage}`);
+			}
+
+			const data = await response.json();
+			return data; // Retorna o objeto do contato criado
+		} catch (error: any) {
+			if (error instanceof NodeOperationError) {
+				throw error;
+			}
+			throw new NodeOperationError(node, `Falha ao criar contato: ${error.message}`);
+		}
+	}
 }

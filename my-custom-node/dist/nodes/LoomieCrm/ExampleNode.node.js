@@ -42,7 +42,10 @@ class ExampleNode {
                     displayName: 'Função',
                     name: 'funcao',
                     type: 'options',
-                    options: [{ name: 'Listar Contato', value: 'listarContato' }],
+                    options: [
+                        { name: 'Listar Contato', value: 'listarContato' },
+                        { name: 'Criar Contato', value: 'criarContato' },
+                    ],
                     default: 'listarContato',
                     description: 'Escolha a função a ser executada',
                     displayOptions: { show: { recurso: ['contatos'] } },
@@ -289,6 +292,95 @@ class ExampleNode {
                     },
                 },
                 {
+                    displayName: 'Nome',
+                    name: 'contatoNome',
+                    type: 'string',
+                    default: '',
+                    description: 'Nome completo do novo contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Email',
+                    name: 'contatoEmail',
+                    type: 'string',
+                    default: '',
+                    description: 'Endereço de email do novo contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Telefone',
+                    name: 'contatoTelefone',
+                    type: 'string',
+                    default: '',
+                    description: 'Número de telefone do novo contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Empresa',
+                    name: 'contatoEmpresa',
+                    type: 'string',
+                    default: '',
+                    description: 'Empresa do contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Cargo',
+                    name: 'contatoCargo',
+                    type: 'string',
+                    default: '',
+                    description: 'Cargo do contato na empresa.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Endereço',
+                    name: 'contatoEndereco',
+                    type: 'string',
+                    default: '',
+                    description: 'Rua e número do endereço.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Cidade',
+                    name: 'contatoCidade',
+                    type: 'string',
+                    default: '',
+                    description: 'Cidade do contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Estado',
+                    name: 'contatoEstado',
+                    type: 'string',
+                    default: '',
+                    description: 'Estado (UF) do contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'CEP',
+                    name: 'contatoCep',
+                    type: 'string',
+                    default: '',
+                    description: 'CEP do contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Data de Nascimento',
+                    name: 'contatoDataNascimento',
+                    type: 'string',
+                    default: '',
+                    description: 'Data de nascimento (formato YYYY-MM-DD).',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
+                    displayName: 'Observações',
+                    name: 'contatoObservacoes',
+                    type: 'string',
+                    typeOptions: { multiline: true },
+                    default: '',
+                    description: 'Quaisquer observações adicionais sobre o contato.',
+                    displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+                },
+                {
                     displayName: 'Auth Token',
                     name: 'authToken',
                     type: 'string',
@@ -310,6 +402,20 @@ class ExampleNode {
                 if (recurso === 'contatos') {
                     if (funcao === 'listarContato') {
                         resultado = await ContatosResource_1.ContatosResource.listarContatos(this.getNode(), authToken);
+                    }
+                    else if (funcao === 'criarContato') {
+                        const contatoNome = this.getNodeParameter('contatoNome', itemIndex);
+                        const contatoEmail = this.getNodeParameter('contatoEmail', itemIndex);
+                        const contatoTelefone = this.getNodeParameter('contatoTelefone', itemIndex);
+                        const contatoEmpresa = this.getNodeParameter('contatoEmpresa', itemIndex);
+                        const contatoCargo = this.getNodeParameter('contatoCargo', itemIndex);
+                        const contatoEndereco = this.getNodeParameter('contatoEndereco', itemIndex);
+                        const contatoCidade = this.getNodeParameter('contatoCidade', itemIndex);
+                        const contatoEstado = this.getNodeParameter('contatoEstado', itemIndex);
+                        const contatoCep = this.getNodeParameter('contatoCep', itemIndex);
+                        const contatoDataNascimento = this.getNodeParameter('contatoDataNascimento', itemIndex);
+                        const contatoObservacoes = this.getNodeParameter('contatoObservacoes', itemIndex);
+                        resultado = await ContatosResource_1.ContatosResource.criarContato(this.getNode(), authToken, contatoNome, contatoEmail, contatoTelefone, contatoEmpresa, contatoCargo, contatoEndereco, contatoCidade, contatoEstado, contatoCep, contatoDataNascimento, contatoObservacoes);
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Contatos`);

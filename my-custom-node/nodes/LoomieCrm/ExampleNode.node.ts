@@ -2,7 +2,7 @@ import {
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
-	INodeTypeDescription
+	INodeTypeDescription,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import { ContatosResource } from '../../resources/ContatosResource';
@@ -22,8 +22,7 @@ export class ExampleNode implements INodeType {
 		defaults: { name: 'LoomieCRM Node' },
 		inputs: ['main'],
 		outputs: ['main'],
-		usableAsTool: true,
-		// @ts-expect-error: n8n AI Tool property
+		usableAsTool: true, // @ts-expect-error: n8n AI Tool property
 		tool: {
 			description:
 				'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; e criar atributos personalizados para negócios. É a ferramenta central para qualquer ação de CRM.',
@@ -48,7 +47,10 @@ export class ExampleNode implements INodeType {
 				displayName: 'Função',
 				name: 'funcao',
 				type: 'options',
-				options: [{ name: 'Listar Contato', value: 'listarContato' }],
+				options: [
+					{ name: 'Listar Contato', value: 'listarContato' },
+					{ name: 'Criar Contato', value: 'criarContato' },
+				],
 				default: 'listarContato',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['contatos'] } },
@@ -78,9 +80,8 @@ export class ExampleNode implements INodeType {
 				default: 'criarNotificacao',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['notificacoes'] } },
-			},
+			}, // Funções de Notas de Atendimento
 
-			// Funções de Notas de Atendimento
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -89,9 +90,8 @@ export class ExampleNode implements INodeType {
 				default: 'criarNota',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['notas'] } },
-			},
+			}, // Funções de Atributos Personalizados
 
-			// Funções de Atributos Personalizados
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -211,8 +211,8 @@ export class ExampleNode implements INodeType {
 					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
 				},
 			}, // Parâmetros para Notas de Atendimento
-
 			// Funções de Notas de Atendimento (propriedade 'funcao' já existe, apenas adicionando campos)
+
 			{
 				displayName: 'Título da Nota',
 				name: 'notaTitulo',
@@ -263,9 +263,7 @@ export class ExampleNode implements INodeType {
 				displayOptions: {
 					show: { recurso: ['notas'], funcao: ['criarNota'] },
 				},
-			},
-
-			// <-- 2. NOVOS PARÂMETROS PARA ATRIBUTOS PERSONALIZADOS
+			}, // <-- 2. NOVOS PARÂMETROS PARA ATRIBUTOS PERSONALIZADOS
 
 			{
 				displayName: 'Label (Rótulo)',
@@ -311,6 +309,96 @@ export class ExampleNode implements INodeType {
 			}, // Parâmetro Auth Token
 
 			{
+				displayName: 'Nome',
+				name: 'contatoNome',
+				type: 'string',
+				default: '',
+				description: 'Nome completo do novo contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Email',
+				name: 'contatoEmail',
+				type: 'string',
+				default: '',
+				description: 'Endereço de email do novo contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Telefone',
+				name: 'contatoTelefone',
+				type: 'string',
+				default: '',
+				description: 'Número de telefone do novo contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Empresa',
+				name: 'contatoEmpresa',
+				type: 'string',
+				default: '',
+				description: 'Empresa do contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Cargo',
+				name: 'contatoCargo',
+				type: 'string',
+				default: '',
+				description: 'Cargo do contato na empresa.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Endereço',
+				name: 'contatoEndereco',
+				type: 'string',
+				default: '',
+				description: 'Rua e número do endereço.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Cidade',
+				name: 'contatoCidade',
+				type: 'string',
+				default: '',
+				description: 'Cidade do contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Estado',
+				name: 'contatoEstado',
+				type: 'string',
+				default: '',
+				description: 'Estado (UF) do contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'CEP',
+				name: 'contatoCep',
+				type: 'string',
+				default: '',
+				description: 'CEP do contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Data de Nascimento',
+				name: 'contatoDataNascimento',
+				type: 'string',
+				default: '',
+				description: 'Data de nascimento (formato YYYY-MM-DD).',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+			{
+				displayName: 'Observações',
+				name: 'contatoObservacoes',
+				type: 'string',
+				typeOptions: { multiline: true },
+				default: '',
+				description: 'Quaisquer observações adicionais sobre o contato.',
+				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
+			},
+
+			{
 				displayName: 'Auth Token',
 				name: 'authToken',
 				type: 'string',
@@ -335,6 +423,40 @@ export class ExampleNode implements INodeType {
 				if (recurso === 'contatos') {
 					if (funcao === 'listarContato') {
 						resultado = await ContatosResource.listarContatos(this.getNode(), authToken);
+					} else if (funcao === 'criarContato') {
+						const contatoNome = this.getNodeParameter('contatoNome', itemIndex) as string;
+						const contatoEmail = this.getNodeParameter('contatoEmail', itemIndex) as string;
+						const contatoTelefone = this.getNodeParameter('contatoTelefone', itemIndex) as string;
+						const contatoEmpresa = this.getNodeParameter('contatoEmpresa', itemIndex) as string;
+						const contatoCargo = this.getNodeParameter('contatoCargo', itemIndex) as string;
+						const contatoEndereco = this.getNodeParameter('contatoEndereco', itemIndex) as string;
+						const contatoCidade = this.getNodeParameter('contatoCidade', itemIndex) as string;
+						const contatoEstado = this.getNodeParameter('contatoEstado', itemIndex) as string;
+						const contatoCep = this.getNodeParameter('contatoCep', itemIndex) as string;
+						const contatoDataNascimento = this.getNodeParameter(
+							'contatoDataNascimento',
+							itemIndex,
+						) as string;
+						const contatoObservacoes = this.getNodeParameter(
+							'contatoObservacoes',
+							itemIndex,
+						) as string;
+
+						resultado = await ContatosResource.criarContato(
+							this.getNode(),
+							authToken,
+							contatoNome,
+							contatoEmail,
+							contatoTelefone,
+							contatoEmpresa,
+							contatoCargo,
+							contatoEndereco,
+							contatoCidade,
+							contatoEstado,
+							contatoCep,
+							contatoDataNascimento,
+							contatoObservacoes,
+						);
 					} else {
 						throw new NodeOperationError(
 							this.getNode(),
