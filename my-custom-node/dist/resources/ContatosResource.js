@@ -72,6 +72,40 @@ class ContatosResource {
             throw new n8n_workflow_1.NodeOperationError(node, `Falha ao criar contato: ${error.message}`);
         }
     }
+    static async buscarContatoPorTelefone(node, authToken, telefone) {
+        const url = `https://backend.loomiecrm.com/contato-buscar_por_telefone/?telefone=${encodeURIComponent(telefone)}`;
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                let errorMessage = `Erro na API: ${response.status} ${response.statusText}`;
+                try {
+                    const errorJson = await response.json();
+                    if (errorJson && typeof errorJson === 'object' && 'error' in errorJson) {
+                        errorMessage = errorJson.error;
+                    }
+                    else if (errorJson) {
+                        errorMessage = JSON.stringify(errorJson);
+                    }
+                }
+                catch { }
+                throw new n8n_workflow_1.NodeOperationError(node, `Falha ao buscar contato: ${errorMessage}`);
+            }
+            const data = await response.json();
+            return data;
+        }
+        catch (error) {
+            if (error instanceof n8n_workflow_1.NodeOperationError) {
+                throw error;
+            }
+            throw new n8n_workflow_1.NodeOperationError(node, `Falha ao buscar contato: ${error.message}`);
+        }
+    }
 }
 exports.ContatosResource = ContatosResource;
 //# sourceMappingURL=ContatosResource.js.map

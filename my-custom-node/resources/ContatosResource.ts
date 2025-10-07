@@ -97,4 +97,46 @@ export class ContatosResource {
 			throw new NodeOperationError(node, `Falha ao criar contato: ${error.message}`);
 		}
 	}
+
+	static async buscarContatoPorTelefone(
+		node: INode,
+		authToken: string,
+		telefone: string,
+	): Promise<any> {
+		// Construct the URL with the 'telefone' query parameter
+		const url = `https://backend.loomiecrm.com/contato-buscar_por_telefone/?telefone=${encodeURIComponent(telefone)}`;
+
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${authToken}`,
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				let errorMessage = `Erro na API: ${response.status} ${response.statusText}`;
+				try {
+					const errorJson = await response.json();
+					if (errorJson && typeof errorJson === 'object' && 'error' in errorJson) {
+						errorMessage = (errorJson as { error: string }).error;
+					} else if (errorJson) {
+						errorMessage = JSON.stringify(errorJson);
+					}
+				} catch {}
+
+				// Handles 404 (Contact not found) and 400 (Missing parameter) errors from Django view
+				throw new NodeOperationError(node, `Falha ao buscar contato: ${errorMessage}`);
+			}
+
+			const data = await response.json();
+			return data;
+		} catch (error: any) {
+			if (error instanceof NodeOperationError) {
+				throw error;
+			}
+			throw new NodeOperationError(node, `Falha ao buscar contato: ${error.message}`);
+		}
+	}
 }

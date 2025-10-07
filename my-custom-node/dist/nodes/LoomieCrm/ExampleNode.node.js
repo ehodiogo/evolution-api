@@ -45,6 +45,7 @@ class ExampleNode {
                     options: [
                         { name: 'Listar Contato', value: 'listarContato' },
                         { name: 'Criar Contato', value: 'criarContato' },
+                        { name: 'Buscar Contato por Telefone', value: 'buscarContatoPorTelefone' },
                     ],
                     default: 'listarContato',
                     description: 'Escolha a função a ser executada',
@@ -113,7 +114,10 @@ class ExampleNode {
                     default: '',
                     description: 'ID do estágio',
                     displayOptions: {
-                        show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'] },
+                        show: {
+                            recurso: ['negocios'],
+                            funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'],
+                        },
                     },
                 },
                 {
@@ -386,6 +390,16 @@ class ExampleNode {
                 },
                 {
                     displayName: 'Telefone/WhatsApp ID',
+                    name: 'contatoBuscaTelefone',
+                    type: 'string',
+                    default: '',
+                    description: 'Telefone ou WhatsApp ID do contato para buscar.',
+                    displayOptions: {
+                        show: { recurso: ['contatos'], funcao: ['buscarContatoPorTelefone'] },
+                    },
+                },
+                {
+                    displayName: 'Telefone/WhatsApp ID',
                     name: 'telefone',
                     type: 'string',
                     default: '',
@@ -430,6 +444,13 @@ class ExampleNode {
                         const contatoDataNascimento = this.getNodeParameter('contatoDataNascimento', itemIndex);
                         const contatoObservacoes = this.getNodeParameter('contatoObservacoes', itemIndex);
                         resultado = await ContatosResource_1.ContatosResource.criarContato(this.getNode(), authToken, contatoNome, contatoEmail, contatoTelefone, contatoEmpresa, contatoCargo, contatoEndereco, contatoCidade, contatoEstado, contatoCep, contatoDataNascimento, contatoObservacoes);
+                    }
+                    else if (funcao === 'buscarContatoPorTelefone') {
+                        const telefone = this.getNodeParameter('contatoBuscaTelefone', itemIndex);
+                        if (!telefone) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'O Telefone/WhatsApp ID é obrigatório para esta função.');
+                        }
+                        resultado = await ContatosResource_1.ContatosResource.buscarContatoPorTelefone(this.getNode(), authToken, telefone);
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Contatos`);

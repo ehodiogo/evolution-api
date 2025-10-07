@@ -50,6 +50,7 @@ export class ExampleNode implements INodeType {
 				options: [
 					{ name: 'Listar Contato', value: 'listarContato' },
 					{ name: 'Criar Contato', value: 'criarContato' },
+					{ name: 'Buscar Contato por Telefone', value: 'buscarContatoPorTelefone' }, // <--- ADICIONADO
 				],
 				default: 'listarContato',
 				description: 'Escolha a função a ser executada',
@@ -123,7 +124,10 @@ export class ExampleNode implements INodeType {
 				default: '',
 				description: 'ID do estágio',
 				displayOptions: {
-					show: { recurso: ['negocios'], funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'] },
+					show: {
+						recurso: ['negocios'],
+						funcao: ['listarNegociosPorEstagio', 'buscarNegocioPorTelefone'],
+					},
 				},
 			},
 			{
@@ -216,7 +220,6 @@ export class ExampleNode implements INodeType {
 				},
 			}, // Parâmetros para Notas de Atendimento
 			// Funções de Notas de Atendimento (propriedade 'funcao' já existe, apenas adicionando campos)
-
 			{
 				displayName: 'Título da Nota',
 				name: 'notaTitulo',
@@ -404,6 +407,17 @@ export class ExampleNode implements INodeType {
 
 			{
 				displayName: 'Telefone/WhatsApp ID',
+				name: 'contatoBuscaTelefone', // <--- NOVO PARÂMETRO
+				type: 'string',
+				default: '',
+				description: 'Telefone ou WhatsApp ID do contato para buscar.',
+				displayOptions: {
+					show: { recurso: ['contatos'], funcao: ['buscarContatoPorTelefone'] }, // <--- MOSTRAR SÓ AQUI
+				},
+			},
+
+			{
+				displayName: 'Telefone/WhatsApp ID',
 				name: 'telefone',
 				type: 'string',
 				default: '',
@@ -471,6 +485,22 @@ export class ExampleNode implements INodeType {
 							contatoCep,
 							contatoDataNascimento,
 							contatoObservacoes,
+						);
+					} else if (funcao === 'buscarContatoPorTelefone') {
+						// <--- ADICIONADO A LÓGICA
+						const telefone = this.getNodeParameter('contatoBuscaTelefone', itemIndex) as string;
+
+						if (!telefone) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'O Telefone/WhatsApp ID é obrigatório para esta função.',
+							);
+						}
+
+						resultado = await ContatosResource.buscarContatoPorTelefone(
+							this.getNode(),
+							authToken,
+							telefone,
 						);
 					} else {
 						throw new NodeOperationError(
