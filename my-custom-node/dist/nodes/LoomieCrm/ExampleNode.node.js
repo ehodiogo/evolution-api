@@ -7,6 +7,7 @@ const NegociosResource_1 = require("../../resources/NegociosResource");
 const NotificacaoResource_1 = require("../../resources/NotificacaoResource");
 const NotasResource_1 = require("../../resources/NotasResource");
 const AtributosResource_1 = require("../../resources/AtributosResource");
+const KnowledgeResource_1 = require("../../resources/KnowledgeResource");
 class ExampleNode {
     constructor() {
         this.description = {
@@ -21,7 +22,7 @@ class ExampleNode {
             outputs: ['main'],
             usableAsTool: true,
             tool: {
-                description: 'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; e criar atributos personalizados para negócios. É a ferramenta central para qualquer ação de CRM.',
+                description: 'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; e **criar Bases de Conhecimento completas**.',
             },
             properties: [
                 {
@@ -34,6 +35,7 @@ class ExampleNode {
                         { name: 'Notificações', value: 'notificacoes' },
                         { name: 'Notas de Atendimento', value: 'notas' },
                         { name: 'Atributos Personalizados', value: 'atributos' },
+                        { name: 'Base de Conhecimento', value: 'knowledge' },
                     ],
                     default: 'contatos',
                     description: 'Escolha o conjunto de funções',
@@ -93,6 +95,66 @@ class ExampleNode {
                     default: 'criarAtributo',
                     description: 'Escolha a função a ser executada',
                     displayOptions: { show: { recurso: ['atributos'] } },
+                },
+                {
+                    displayName: 'Função',
+                    name: 'funcao',
+                    type: 'options',
+                    options: [
+                        { name: 'Criar Base de Conhecimento Completa', value: 'criarBaseDeConhecimentoCompleta' },
+                    ],
+                    default: 'criarBaseDeConhecimentoCompleta',
+                    description: 'Escolha a função a ser executada',
+                    displayOptions: { show: { recurso: ['knowledge'] } },
+                },
+                {
+                    displayName: 'ID do Cliente',
+                    name: 'clientId',
+                    type: 'number',
+                    typeOptions: {
+                        numberPrecision: 0,
+                    },
+                    default: 0,
+                    description: 'O ID numérico do cliente ao qual a base de conhecimento pertence.',
+                    displayOptions: {
+                        show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+                    },
+                },
+                {
+                    displayName: 'Nome da Base de Conhecimento',
+                    name: 'knowledgeBaseName',
+                    type: 'string',
+                    default: '',
+                    description: 'O nome da nova Base de Conhecimento (KnowledgeBaseSet).',
+                    displayOptions: {
+                        show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+                    },
+                },
+                {
+                    displayName: 'Campos (Fields) (JSON)',
+                    name: 'knowledgeFieldsJson',
+                    type: 'json',
+                    typeOptions: {
+                        multiline: true,
+                    },
+                    default: '[]',
+                    description: 'Array de objetos JSON para os campos (Fields) da base. Ex: [{"name": "Cor", "field_type": "TEXT", "required": false}]',
+                    displayOptions: {
+                        show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+                    },
+                },
+                {
+                    displayName: 'Entradas (Entries) (JSON)',
+                    name: 'knowledgeEntriesJson',
+                    type: 'json',
+                    typeOptions: {
+                        multiline: true,
+                    },
+                    default: '[]',
+                    description: 'Array de objetos JSON para as entradas (Entries/Dados). Ex: [{"values": {"Cor": "Azul", "Preço": 150000}}]',
+                    displayOptions: {
+                        show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+                    },
                 },
                 {
                     displayName: 'ID do Kanban',
@@ -534,6 +596,36 @@ class ExampleNode {
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Atributos Personalizados`);
+                    }
+                }
+                else if (recurso === 'knowledge') {
+                    if (funcao === 'criarBaseDeConhecimentoCompleta') {
+                        const clientId = this.getNodeParameter('clientId', itemIndex);
+                        const name = this.getNodeParameter('knowledgeBaseName', itemIndex);
+                        const fieldsJson = this.getNodeParameter('knowledgeFieldsJson', itemIndex);
+                        const entriesJson = this.getNodeParameter('knowledgeEntriesJson', itemIndex);
+                        let fields = [];
+                        let entries = [];
+                        if (fieldsJson && fieldsJson !== '[]') {
+                            try {
+                                fields = JSON.parse(fieldsJson);
+                            }
+                            catch (e) {
+                                throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Erro ao analisar o JSON dos Campos (Fields): ${e.message}`);
+                            }
+                        }
+                        if (entriesJson && entriesJson !== '[]') {
+                            try {
+                                entries = JSON.parse(entriesJson);
+                            }
+                            catch (e) {
+                                throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Erro ao analisar o JSON das Entradas (Entries): ${e.message}`);
+                            }
+                        }
+                        resultado = await KnowledgeResource_1.KnowledgeResource.criarBaseDeConhecimentoCompleta(this.getNode(), authToken, clientId, name, fields, entries);
+                    }
+                    else {
+                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Base de Conhecimento`);
                     }
                 }
                 else {

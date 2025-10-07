@@ -10,6 +10,7 @@ import { NegociosResource } from '../../resources/NegociosResource';
 import { NotificacaoResource } from '../../resources/NotificacaoResource';
 import { NotasResource } from '../../resources/NotasResource';
 import { AtributosResource } from '../../resources/AtributosResource';
+import { KnowledgeResource } from '../../resources/KnowledgeResource'; // IMPORT: KnowledgeResource
 
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -25,7 +26,7 @@ export class ExampleNode implements INodeType {
 		usableAsTool: true, // @ts-expect-error: n8n AI Tool property
 		tool: {
 			description:
-				'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; e criar atributos personalizados para negócios. É a ferramenta central para qualquer ação de CRM.',
+				'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; e **criar Bases de Conhecimento completas**.',
 		},
 		properties: [
 			{
@@ -37,12 +38,14 @@ export class ExampleNode implements INodeType {
 					{ name: 'Negócios', value: 'negocios' },
 					{ name: 'Notificações', value: 'notificacoes' },
 					{ name: 'Notas de Atendimento', value: 'notas' },
-					{ name: 'Atributos Personalizados', value: 'atributos' }, // <-- NOVO RECURSO
+					{ name: 'Atributos Personalizados', value: 'atributos' },
+					{ name: 'Base de Conhecimento', value: 'knowledge' }, // NOVO RECURSO
 				],
 				default: 'contatos',
 				description: 'Escolha o conjunto de funções',
 			},
 
+			// Funções de Contatos
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -50,13 +53,13 @@ export class ExampleNode implements INodeType {
 				options: [
 					{ name: 'Listar Contato', value: 'listarContato' },
 					{ name: 'Criar Contato', value: 'criarContato' },
-					{ name: 'Buscar Contato por Telefone', value: 'buscarContatoPorTelefone' }, // <--- ADICIONADO
+					{ name: 'Buscar Contato por Telefone', value: 'buscarContatoPorTelefone' },
 				],
 				default: 'listarContato',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['contatos'] } },
-			}, // Funções de Negócios
-
+			},
+			// Funções de Negócios
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -72,8 +75,8 @@ export class ExampleNode implements INodeType {
 				default: 'criarNegocio',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['negocios'] } },
-			}, // Funções de Notificações
-
+			},
+			// Funções de Notificações
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -82,8 +85,8 @@ export class ExampleNode implements INodeType {
 				default: 'criarNotificacao',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['notificacoes'] } },
-			}, // Funções de Notas de Atendimento
-
+			},
+			// Funções de Notas de Atendimento
 			{
 				displayName: 'Função',
 				name: 'funcao',
@@ -92,18 +95,85 @@ export class ExampleNode implements INodeType {
 				default: 'criarNota',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['notas'] } },
-			}, // Funções de Atributos Personalizados
-
+			},
+			// Funções de Atributos Personalizados
 			{
 				displayName: 'Função',
 				name: 'funcao',
 				type: 'options',
-				options: [{ name: 'Criar Atributo', value: 'criarAtributo' }], // <-- NOVA FUNÇÃO
+				options: [{ name: 'Criar Atributo', value: 'criarAtributo' }],
 				default: 'criarAtributo',
 				description: 'Escolha a função a ser executada',
 				displayOptions: { show: { recurso: ['atributos'] } },
-			}, // Parâmetros Comuns/Negócios
+			},
+			// Funções de Base de Conhecimento
+			{
+				displayName: 'Função',
+				name: 'funcao',
+				type: 'options',
+				options: [
+					{ name: 'Criar Base de Conhecimento Completa', value: 'criarBaseDeConhecimentoCompleta' },
+				],
+				default: 'criarBaseDeConhecimentoCompleta',
+				description: 'Escolha a função a ser executada',
+				displayOptions: { show: { recurso: ['knowledge'] } },
+			},
 
+			// Parâmetros do Recurso Knowledge Base (Base de Conhecimento)
+			{
+				displayName: 'ID do Cliente',
+				name: 'clientId',
+				type: 'number',
+				typeOptions: {
+					numberPrecision: 0,
+				},
+				default: 0,
+				description: 'O ID numérico do cliente ao qual a base de conhecimento pertence.',
+				displayOptions: {
+					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+				},
+			},
+			{
+				displayName: 'Nome da Base de Conhecimento',
+				name: 'knowledgeBaseName',
+				type: 'string',
+				default: '',
+				description: 'O nome da nova Base de Conhecimento (KnowledgeBaseSet).',
+				displayOptions: {
+					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+				},
+			},
+			{
+				displayName: 'Campos (Fields) (JSON)',
+				name: 'knowledgeFieldsJson',
+				type: 'json',
+				typeOptions: {
+					multiline: true,
+				},
+				default: '[]',
+				description:
+					'Array de objetos JSON para os campos (Fields) da base. Ex: [{"name": "Cor", "field_type": "TEXT", "required": false}]',
+				displayOptions: {
+					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+				},
+			},
+			{
+				displayName: 'Entradas (Entries) (JSON)',
+				name: 'knowledgeEntriesJson',
+				type: 'json',
+				typeOptions: {
+					multiline: true,
+				},
+				default: '[]',
+				description:
+					'Array de objetos JSON para as entradas (Entries/Dados). Ex: [{"values": {"Cor": "Azul", "Preço": 150000}}]',
+				displayOptions: {
+					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
+				},
+			},
+			// FIM dos Parâmetros Knowledge Base
+
+			// Parâmetros Comuns/Negócios
 			{
 				displayName: 'ID do Kanban',
 				name: 'kanbanId',
@@ -177,8 +247,8 @@ export class ExampleNode implements INodeType {
 				description: 'ID do negócio para obter, atualizar ou anexar atributos.',
 				displayOptions: {
 					show: {
-						recurso: ['negocios', 'atributos'], // <-- Adicionado 'atributos'
-						funcao: ['obterNegocio', 'atualizarNegocio', 'trocarEstagio', 'criarAtributo'], // <-- Adicionado 'criarAtributo'
+						recurso: ['negocios', 'atributos'],
+						funcao: ['obterNegocio', 'atualizarNegocio', 'trocarEstagio', 'criarAtributo'],
 					},
 				},
 			}, // Parâmetros para Notificações
@@ -219,7 +289,6 @@ export class ExampleNode implements INodeType {
 					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
 				},
 			}, // Parâmetros para Notas de Atendimento
-			// Funções de Notas de Atendimento (propriedade 'funcao' já existe, apenas adicionando campos)
 			{
 				displayName: 'Título da Nota',
 				name: 'notaTitulo',
@@ -270,7 +339,7 @@ export class ExampleNode implements INodeType {
 				displayOptions: {
 					show: { recurso: ['notas'], funcao: ['criarNota'] },
 				},
-			}, // <-- 2. NOVOS PARÂMETROS PARA ATRIBUTOS PERSONALIZADOS
+			}, // Parâmetros para Atributos Personalizados
 
 			{
 				displayName: 'Label (Rótulo)',
@@ -285,7 +354,7 @@ export class ExampleNode implements INodeType {
 
 			{
 				displayName: 'Valor',
-				name: 'atributoValor', // Renomeado para evitar conflito com 'valor' de Negócio
+				name: 'atributoValor',
 				type: 'string',
 				default: '',
 				description: 'O valor do atributo (ex: "Azul" ou "100"). Deve ser string.',
@@ -313,7 +382,7 @@ export class ExampleNode implements INodeType {
 				displayOptions: {
 					show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
 				},
-			}, // Parâmetro Auth Token
+			}, // Parâmetros para Contatos
 
 			{
 				displayName: 'Nome',
@@ -407,12 +476,12 @@ export class ExampleNode implements INodeType {
 
 			{
 				displayName: 'Telefone/WhatsApp ID',
-				name: 'contatoBuscaTelefone', // <--- NOVO PARÂMETRO
+				name: 'contatoBuscaTelefone',
 				type: 'string',
 				default: '',
 				description: 'Telefone ou WhatsApp ID do contato para buscar.',
 				displayOptions: {
-					show: { recurso: ['contatos'], funcao: ['buscarContatoPorTelefone'] }, // <--- MOSTRAR SÓ AQUI
+					show: { recurso: ['contatos'], funcao: ['buscarContatoPorTelefone'] },
 				},
 			},
 
@@ -423,7 +492,7 @@ export class ExampleNode implements INodeType {
 				default: '',
 				description: 'Telefone ou WhatsApp ID do contato para buscar o negócio.',
 				displayOptions: {
-					show: { recurso: ['negocios'], funcao: ['buscarNegocioPorTelefone'] }, // <-- Mostrar apenas nesta função
+					show: { recurso: ['negocios'], funcao: ['buscarNegocioPorTelefone'] },
 				},
 			},
 
@@ -487,7 +556,6 @@ export class ExampleNode implements INodeType {
 							contatoObservacoes,
 						);
 					} else if (funcao === 'buscarContatoPorTelefone') {
-						// <--- ADICIONADO A LÓGICA
 						const telefone = this.getNodeParameter('contatoBuscaTelefone', itemIndex) as string;
 
 						if (!telefone) {
@@ -530,13 +598,11 @@ export class ExampleNode implements INodeType {
 							contatoId,
 						);
 					} else if (funcao === 'obterNegocio') {
-						// Only retrieve 'negocioId' for this function
 						negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
 						resultado = await NegociosResource.obterNegocio(this.getNode(), authToken, negocioId);
 					} else if (funcao === 'atualizarNegocio') {
-						// Retrieve only the parameters displayed for this function
 						negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
-						titulo = this.getNodeParameter('titulo', itemIndex, undefined) as string; // Use default value (undefined) for optional parameters
+						titulo = this.getNodeParameter('titulo', itemIndex, undefined) as string;
 						valor = this.getNodeParameter('valor', itemIndex, undefined) as number;
 						estagioId = this.getNodeParameter('estagioId', itemIndex, undefined) as string;
 						contatoId = this.getNodeParameter('contatoId', itemIndex, undefined) as string;
@@ -615,7 +681,7 @@ export class ExampleNode implements INodeType {
 					if (funcao === 'criarNota') {
 						const notaTitulo = this.getNodeParameter('notaTitulo', itemIndex) as string;
 						const conteudo = this.getNodeParameter('conteudo', itemIndex) as string;
-						const notaTipo = this.getNodeParameter('notaTipo', itemIndex) as string; // conversaId é opcional, então passamos o default
+						const notaTipo = this.getNodeParameter('notaTipo', itemIndex) as string;
 						const conversaId = this.getNodeParameter('conversaId', itemIndex, undefined) as
 							| string
 							| undefined;
@@ -626,7 +692,7 @@ export class ExampleNode implements INodeType {
 							notaTitulo,
 							conteudo,
 							notaTipo,
-							conversaId, // Pode ser undefined
+							conversaId,
 						);
 					} else {
 						throw new NodeOperationError(
@@ -635,7 +701,6 @@ export class ExampleNode implements INodeType {
 						);
 					}
 				} else if (recurso === 'atributos') {
-					// <-- 3. NOVO BLOCO DE LÓGICA
 					if (funcao === 'criarAtributo') {
 						const negocioId = this.getNodeParameter('negocioId', itemIndex) as string;
 						const label = this.getNodeParameter('label', itemIndex) as string;
@@ -656,6 +721,54 @@ export class ExampleNode implements INodeType {
 							`Função "${funcao}" não implementada para Atributos Personalizados`,
 						);
 					}
+				} else if (recurso === 'knowledge') {
+					// BLOCO DE EXECUÇÃO: Knowledge Base (ATUALIZADO)
+					if (funcao === 'criarBaseDeConhecimentoCompleta') {
+						const clientId = this.getNodeParameter('clientId', itemIndex) as number;
+						const name = this.getNodeParameter('knowledgeBaseName', itemIndex) as string;
+						const fieldsJson = this.getNodeParameter('knowledgeFieldsJson', itemIndex) as string;
+						const entriesJson = this.getNodeParameter('knowledgeEntriesJson', itemIndex) as string; // NOVO
+						let fields: any[] = [];
+						let entries: any[] = []; // NOVO
+
+						// Processa Fields
+						if (fieldsJson && fieldsJson !== '[]') {
+							try {
+								fields = JSON.parse(fieldsJson);
+							} catch (e) {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Erro ao analisar o JSON dos Campos (Fields): ${(e as Error).message}`,
+								);
+							}
+						}
+
+						// Processa Entries
+						if (entriesJson && entriesJson !== '[]') {
+							try {
+								entries = JSON.parse(entriesJson);
+							} catch (e) {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Erro ao analisar o JSON das Entradas (Entries): ${(e as Error).message}`,
+								);
+							}
+						}
+
+						resultado = await KnowledgeResource.criarBaseDeConhecimentoCompleta(
+							this.getNode(),
+							authToken,
+							clientId,
+							name,
+							fields,
+							entries, // ENVIANDO O ARRAY DE ENTRIES
+						);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${funcao}" não implementada para Base de Conhecimento`,
+						);
+					}
 				} else {
 					throw new NodeOperationError(this.getNode(), `Recurso "${recurso}" não implementado`);
 				}
@@ -673,4 +786,3 @@ export class ExampleNode implements INodeType {
 		return [returnData];
 	}
 }
-
