@@ -5,55 +5,49 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
+// Garante a exportação padrão para evitar o erro 'not a constructor'
 export class ExampleCredentialsApi implements ICredentialType {
-	name = 'exampleCredentialsApi';
-	displayName = 'Example Credentials API';
+	// Ajusta o nome para corresponder ao Node
+	name = 'loomieCRMApi';
+	displayName = 'LoomieCRM API';
 
 	documentationUrl = 'https://your-docs-url';
 
+	// MUDANÇA ESSENCIAL: Armazenar apenas o Access Token
 	properties: INodeProperties[] = [
-		// The credentials to get from user and save encrypted.
-		// Properties can be defined exactly in the same way
-		// as node properties.
 		{
-			displayName: 'User Name',
-			name: 'username',
-			type: 'string',
-			default: '',
-		},
-		{
-			displayName: 'Password',
-			name: 'password',
+			displayName: 'Access Token (Bearer)',
+			name: 'accessToken',
 			type: 'string',
 			typeOptions: {
-				password: true,
+				password: true, // Importante para armazenar de forma segura
 			},
 			default: '',
+			description: 'O Access Token Bearer para autenticação na API LoomieCRM.',
 		},
 	];
 
-	// This credential is currently not used by any node directly
-	// but the HTTP Request node can use it to make requests.
-	// The credential is also testable due to the `test` property below
+	// Como é apenas um token, o bloco 'authenticate' não é estritamente necessário
+	// a menos que você queira que ele configure automaticamente o header HTTP para o Node de HTTP Request.
+	// Para custom nodes, é melhor obter a propriedade diretamente como você já faz.
 	authenticate: IAuthenticateGeneric = {
 		type: 'generic',
 		properties: {
-			auth: {
-				username: '={{ $credentials.username }}',
-				password: '={{ $credentials.password }}',
-			},
-			qs: {
-				// Send this as part of the query string
-				n8n: 'rocks',
+			headers: {
+				// Isso configura o cabeçalho Authorization automaticamente para outros Nodes
+				Authorization: '={{ "Bearer " + $credentials.accessToken }}',
 			},
 		},
 	};
 
-	// The block below tells how this credential can be tested
+	// Se você tiver um endpoint simples que valide o token, configure o teste
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: 'https://example.com/',
-			url: '',
+			baseURL: 'https://backend.loomiecrm.com/', // Sua URL base
+			url: 'contatos/', // Um endpoint simples, como listar contatos
+			headers: {
+				Authorization: '={{ "Bearer " + $credentials.accessToken }}',
+			},
 		},
 	};
 }

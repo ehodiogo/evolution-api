@@ -24,6 +24,12 @@ class ExampleNode {
             tool: {
                 description: 'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; e **criar Bases de Conhecimento completas**.',
             },
+            credentials: [
+                {
+                    name: 'loomieCRMApi',
+                    required: true,
+                },
+            ],
             properties: [
                 {
                     displayName: 'Recurso',
@@ -470,24 +476,18 @@ class ExampleNode {
                         show: { recurso: ['negocios'], funcao: ['buscarNegocioPorTelefone'] },
                     },
                 },
-                {
-                    displayName: 'Auth Token',
-                    name: 'authToken',
-                    type: 'string',
-                    default: '',
-                    description: 'Token de autenticação Bearer para acessar a API',
-                },
             ],
         };
     }
     async execute() {
         const items = this.getInputData();
         const returnData = [];
+        const credentials = (await this.getCredentials('loomieCRMApi'));
+        const authToken = credentials.accessToken;
         for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
             try {
                 const recurso = this.getNodeParameter('recurso', itemIndex);
                 const funcao = this.getNodeParameter('funcao', itemIndex);
-                const authToken = this.getNodeParameter('authToken', itemIndex);
                 let resultado;
                 if (recurso === 'contatos') {
                     if (funcao === 'listarContato') {

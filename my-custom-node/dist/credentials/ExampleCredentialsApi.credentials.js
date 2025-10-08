@@ -3,42 +3,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExampleCredentialsApi = void 0;
 class ExampleCredentialsApi {
     constructor() {
-        this.name = 'exampleCredentialsApi';
-        this.displayName = 'Example Credentials API';
+        this.name = 'loomieCRMApi';
+        this.displayName = 'LoomieCRM API';
         this.documentationUrl = 'https://your-docs-url';
         this.properties = [
             {
-                displayName: 'User Name',
-                name: 'username',
-                type: 'string',
-                default: '',
-            },
-            {
-                displayName: 'Password',
-                name: 'password',
+                displayName: 'Access Token (Bearer)',
+                name: 'accessToken',
                 type: 'string',
                 typeOptions: {
                     password: true,
                 },
                 default: '',
+                description: 'O Access Token Bearer para autenticação na API LoomieCRM.',
             },
         ];
         this.authenticate = {
             type: 'generic',
             properties: {
-                auth: {
-                    username: '={{ $credentials.username }}',
-                    password: '={{ $credentials.password }}',
-                },
-                qs: {
-                    n8n: 'rocks',
+                headers: {
+                    Authorization: '={{ "Bearer " + $credentials.accessToken }}',
                 },
             },
         };
         this.test = {
             request: {
-                baseURL: 'https://example.com/',
-                url: '',
+                baseURL: 'https://backend.loomiecrm.com/',
+                url: 'contatos/',
+                headers: {
+                    Authorization: '={{ "Bearer " + $credentials.accessToken }}',
+                },
             },
         };
     }
