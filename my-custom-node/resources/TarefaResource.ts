@@ -90,8 +90,6 @@ export class TarefasResource {
         },
       };
 
-			console.log("Payload de criação de tarefa:", payload); // DEBUG
-
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
