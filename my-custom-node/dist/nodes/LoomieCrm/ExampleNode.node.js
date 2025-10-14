@@ -8,6 +8,7 @@ const NotificacaoResource_1 = require("../../resources/NotificacaoResource");
 const NotasResource_1 = require("../../resources/NotasResource");
 const AtributosResource_1 = require("../../resources/AtributosResource");
 const KnowledgeResource_1 = require("../../resources/KnowledgeResource");
+const TarefaResource_1 = require("../../resources/TarefaResource");
 class ExampleNode {
     constructor() {
         this.description = {
@@ -22,7 +23,7 @@ class ExampleNode {
             outputs: ['main'],
             usableAsTool: true,
             tool: {
-                description: 'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; e **criar Bases de Conhecimento completas**.',
+                description: 'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; criar Bases de Conhecimento completas; e **criar tarefas agendadas (webhooks)**.',
             },
             credentials: [
                 {
@@ -42,6 +43,7 @@ class ExampleNode {
                         { name: 'Notas de Atendimento', value: 'notas' },
                         { name: 'Atributos Personalizados', value: 'atributos' },
                         { name: 'Base de Conhecimento', value: 'knowledge' },
+                        { name: 'Tarefas Agendadas', value: 'tarefas' },
                     ],
                     default: 'contatos',
                     description: 'Escolha o conjunto de funções',
@@ -112,6 +114,106 @@ class ExampleNode {
                     default: 'criarBaseDeConhecimentoCompleta',
                     description: 'Escolha a função a ser executada',
                     displayOptions: { show: { recurso: ['knowledge'] } },
+                },
+                {
+                    displayName: 'Função',
+                    name: 'funcao',
+                    type: 'options',
+                    options: [
+                        { name: 'Criar Tarefa Agendada (Webhook)', value: 'criarTarefaAgendadaWebhook' },
+                    ],
+                    default: 'criarTarefaAgendadaWebhook',
+                    description: 'Escolha a função a ser executada para agendamento.',
+                    displayOptions: { show: { recurso: ['tarefas'] } },
+                },
+                {
+                    displayName: 'Link Webhook N8N',
+                    name: 'linkWebhookN8n',
+                    type: 'string',
+                    default: '',
+                    description: 'A URL completa do Webhook do n8n que será chamado no agendamento.',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Destinatário (ID Contato/ID Negócio/Número do WhatsApp)',
+                    name: 'destinatario',
+                    type: 'string',
+                    default: '',
+                    description: 'ID do Contato ou Negócio (obrigatório).',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Mensagem/Assunto',
+                    name: 'mensagem',
+                    type: 'string',
+                    typeOptions: {
+                        multiline: true,
+                    },
+                    default: 'Mudou de estágio!',
+                    description: 'A nota ou mensagem que será enviada quando a tarefa for executada (obrigatório).',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Recorrência - Tipo',
+                    name: 'recorrenciaTipo',
+                    type: 'options',
+                    options: [
+                        { name: 'Única (Data/Hora)', value: TarefaResource_1.RECORRENCIA_TYPE_CHOICES.UNICA },
+                        { name: 'A Cada X Horas', value: TarefaResource_1.RECORRENCIA_TYPE_CHOICES.HORAS },
+                        { name: 'Diária (Hora)', value: TarefaResource_1.RECORRENCIA_TYPE_CHOICES.DIARIA },
+                        { name: 'Semanal (Dia e Hora)', value: TarefaResource_1.RECORRENCIA_TYPE_CHOICES.DIAS },
+                    ],
+                    default: TarefaResource_1.RECORRENCIA_TYPE_CHOICES.UNICA,
+                    description: 'Define como a tarefa será repetida.',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Recorrência - Valor 1',
+                    name: 'recorrenciaValor1',
+                    type: 'string',
+                    default: '',
+                    description: 'Data/Hora (unica: YYYY-MM-DD HH:MM), Horas (horas: 1, 2, 3...), Hora do Dia (diaria: HH:MM), Dia da Semana (dias: 0-6).',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Recorrência - Valor 2 (Opcional)',
+                    name: 'recorrenciaValor2',
+                    type: 'string',
+                    default: '',
+                    description: 'Usado apenas para Recorrência "Diária" (HH:MM de início/fim) ou "Semanal" (Hora do Dia).',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Precisa Enviar (Opcional)',
+                    name: 'precisarEnviar',
+                    type: 'boolean',
+                    default: false,
+                    description: 'Se verdadeiro, o destinatário receberá uma mensagem de envio (opcional).',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Código (Opcional)',
+                    name: 'codigo',
+                    type: 'string',
+                    default: '',
+                    description: 'Um código de referência para a tarefa (opcional).',
+                    displayOptions: {
+                        show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
                 },
                 {
                     displayName: 'ID do Cliente',
@@ -626,6 +728,27 @@ class ExampleNode {
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Base de Conhecimento`);
+                    }
+                }
+                else if (recurso === 'tarefas') {
+                    if (funcao === 'criarTarefaAgendadaWebhook') {
+                        const linkWebhookN8n = this.getNodeParameter('linkWebhookN8n', itemIndex);
+                        const destinatario = this.getNodeParameter('destinatario', itemIndex);
+                        const mensagem = this.getNodeParameter('mensagem', itemIndex);
+                        const recorrenciaTipo = this.getNodeParameter('recorrenciaTipo', itemIndex);
+                        const recorrenciaValor1 = this.getNodeParameter('recorrenciaValor1', itemIndex);
+                        const recorrenciaValor2 = this.getNodeParameter('recorrenciaValor2', itemIndex, undefined);
+                        const precisarEnviar = this.getNodeParameter('precisarEnviar', itemIndex, undefined);
+                        const codigo = this.getNodeParameter('codigo', itemIndex, undefined);
+                        const configRecorrencia = {
+                            tipo: recorrenciaTipo,
+                            valor1: recorrenciaValor1,
+                            valor2: recorrenciaValor2,
+                        };
+                        resultado = await TarefaResource_1.TarefasResource.criarTarefaAgendadaWebhook(this.getNode(), authToken, destinatario, mensagem, configRecorrencia, linkWebhookN8n, precisarEnviar, codigo);
+                    }
+                    else {
+                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Tarefas Agendadas`);
                     }
                 }
                 else {

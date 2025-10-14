@@ -11,8 +11,7 @@ import { NotificacaoResource } from '../../resources/NotificacaoResource';
 import { NotasResource } from '../../resources/NotasResource';
 import { AtributosResource } from '../../resources/AtributosResource';
 import { KnowledgeResource } from '../../resources/KnowledgeResource';
-
-// ... (O restante das importações e a descrição da classe IExecuteFunctions permanecem iguais)
+import { TarefasResource, RECORRENCIA_TYPE_CHOICES } from '../../resources/TarefaResource';
 
 export class ExampleNode implements INodeType {
   description: INodeTypeDescription = {
@@ -26,19 +25,17 @@ export class ExampleNode implements INodeType {
     inputs: ['main'],
     outputs: ['main'],
     usableAsTool: true,
-		// @ts-expect-error: n8n AI Tool property
+    // @ts-expect-error: n8n AI Tool property
     tool: {
       description:
-        'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; e **criar Bases de Conhecimento completas**.',
+        'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; criar Bases de Conhecimento completas; e **criar tarefas agendadas (webhooks)**.',
     },
-    // NOVO: Adiciona o vínculo com a Credencial
     credentials: [
-			{
-				name: 'loomieCRMApi', // Deve corresponder ao 'name' da classe LoomieCRMApi
-				required: true, // Garante que a credencial seja obrigatória
-    	},
-		],
-    // FIM NOVO
+      {
+        name: 'loomieCRMApi',
+        required: true,
+      },
+    ],
     properties: [
       {
         displayName: 'Recurso',
@@ -50,13 +47,14 @@ export class ExampleNode implements INodeType {
           { name: 'Notificações', value: 'notificacoes' },
           { name: 'Notas de Atendimento', value: 'notas' },
           { name: 'Atributos Personalizados', value: 'atributos' },
-          { name: 'Base de Conhecimento', value: 'knowledge' }, // NOVO RECURSO
+          { name: 'Base de Conhecimento', value: 'knowledge' },
+          { name: 'Tarefas Agendadas', value: 'tarefas' }, // NOVO RECURSO
         ],
         default: 'contatos',
         description: 'Escolha o conjunto de funções',
       },
 
-      // Funções de Contatos
+      // Funções de Contatos (existente)
       {
         displayName: 'Função',
         name: 'funcao',
@@ -70,7 +68,7 @@ export class ExampleNode implements INodeType {
         description: 'Escolha a função a ser executada',
         displayOptions: { show: { recurso: ['contatos'] } },
       },
-      // Funções de Negócios
+      // Funções de Negócios (existente)
       {
         displayName: 'Função',
         name: 'funcao',
@@ -87,7 +85,7 @@ export class ExampleNode implements INodeType {
         description: 'Escolha a função a ser executada',
         displayOptions: { show: { recurso: ['negocios'] } },
       },
-      // Funções de Notificações
+      // Funções de Notificações (existente)
       {
         displayName: 'Função',
         name: 'funcao',
@@ -97,7 +95,7 @@ export class ExampleNode implements INodeType {
         description: 'Escolha a função a ser executada',
         displayOptions: { show: { recurso: ['notificacoes'] } },
       },
-      // Funções de Notas de Atendimento
+      // Funções de Notas de Atendimento (existente)
       {
         displayName: 'Função',
         name: 'funcao',
@@ -107,7 +105,7 @@ export class ExampleNode implements INodeType {
         description: 'Escolha a função a ser executada',
         displayOptions: { show: { recurso: ['notas'] } },
       },
-      // Funções de Atributos Personalizados
+      // Funções de Atributos Personalizados (existente)
       {
         displayName: 'Função',
         name: 'funcao',
@@ -117,7 +115,7 @@ export class ExampleNode implements INodeType {
         description: 'Escolha a função a ser executada',
         displayOptions: { show: { recurso: ['atributos'] } },
       },
-      // Funções de Base de Conhecimento
+      // Funções de Base de Conhecimento (existente)
       {
         displayName: 'Função',
         name: 'funcao',
@@ -129,7 +127,114 @@ export class ExampleNode implements INodeType {
         description: 'Escolha a função a ser executada',
         displayOptions: { show: { recurso: ['knowledge'] } },
       },
+      // Funções de Tarefas Agendadas (NOVO)
+      {
+        displayName: 'Função',
+        name: 'funcao',
+        type: 'options',
+        options: [
+          { name: 'Criar Tarefa Agendada (Webhook)', value: 'criarTarefaAgendadaWebhook' },
+        ],
+        default: 'criarTarefaAgendadaWebhook',
+        description: 'Escolha a função a ser executada para agendamento.',
+        displayOptions: { show: { recurso: ['tarefas'] } },
+      },
 
+      // Parâmetros de Tarefas Agendadas (NOVO)
+      {
+        displayName: 'Link Webhook N8N',
+        name: 'linkWebhookN8n',
+        type: 'string',
+        default: '',
+        description: 'A URL completa do Webhook do n8n que será chamado no agendamento.',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      {
+        displayName: 'Destinatário (ID Contato/ID Negócio/Número do WhatsApp)',
+        name: 'destinatario',
+        type: 'string',
+        default: '',
+        description: 'ID do Contato ou Negócio (obrigatório).',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      {
+        displayName: 'Mensagem/Assunto',
+        name: 'mensagem',
+        type: 'string',
+        typeOptions: {
+          multiline: true,
+        },
+        default: 'Mudou de estágio!',
+        description:
+          'A nota ou mensagem que será enviada quando a tarefa for executada (obrigatório).',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      {
+        displayName: 'Recorrência - Tipo',
+        name: 'recorrenciaTipo',
+        type: 'options',
+        options: [
+          { name: 'Única (Data/Hora)', value: RECORRENCIA_TYPE_CHOICES.UNICA },
+          { name: 'A Cada X Horas', value: RECORRENCIA_TYPE_CHOICES.HORAS },
+          { name: 'Diária (Hora)', value: RECORRENCIA_TYPE_CHOICES.DIARIA },
+          { name: 'Semanal (Dia e Hora)', value: RECORRENCIA_TYPE_CHOICES.DIAS },
+        ],
+        default: RECORRENCIA_TYPE_CHOICES.UNICA,
+        description: 'Define como a tarefa será repetida.',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      {
+        displayName: 'Recorrência - Valor 1',
+        name: 'recorrenciaValor1',
+        type: 'string',
+        default: '',
+        description:
+          'Data/Hora (unica: YYYY-MM-DD HH:MM), Horas (horas: 1, 2, 3...), Hora do Dia (diaria: HH:MM), Dia da Semana (dias: 0-6).',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      {
+        displayName: 'Recorrência - Valor 2 (Opcional)',
+        name: 'recorrenciaValor2',
+        type: 'string',
+        default: '',
+        description: 'Usado apenas para Recorrência "Diária" (HH:MM de início/fim) ou "Semanal" (Hora do Dia).',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      {
+        displayName: 'Precisa Enviar (Opcional)',
+        name: 'precisarEnviar',
+        type: 'boolean',
+        default: false,
+        description: 'Se verdadeiro, o destinatário receberá uma mensagem de envio (opcional).',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      {
+        displayName: 'Código (Opcional)',
+        name: 'codigo',
+        type: 'string',
+        default: '',
+        description: 'Um código de referência para a tarefa (opcional).',
+        displayOptions: {
+          show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+        },
+      },
+      // FIM dos Parâmetros Tarefas Agendadas
+
+      // ... (Restante dos parâmetros existentes) ...
       // Parâmetros do Recurso Knowledge Base (Base de Conhecimento)
       {
         displayName: 'ID do Cliente',
@@ -506,17 +611,6 @@ export class ExampleNode implements INodeType {
           show: { recurso: ['negocios'], funcao: ['buscarNegocioPorTelefone'] },
         },
       },
-
-      // O PARÂMETRO 'Auth Token' FOI REMOVIDO E SUBSTITUÍDO PELA PROPRIEDADE 'credential'
-      /*
-        {
-          displayName: 'Auth Token',
-          name: 'authToken',
-          type: 'string',
-          default: '',
-          description: 'Token de autenticação Bearer para acessar a API',
-        },
-      */
     ],
   };
 
@@ -524,10 +618,8 @@ export class ExampleNode implements INodeType {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
 
-    // OBTENDO CREDENCIAL FORA DO LOOP
-    // A interface do seu arquivo de credencial deve ter a propriedade 'accessToken'
     const credentials = (await this.getCredentials('loomieCRMApi')) as {
-      accessToken: string; // O n8n garante que este campo existe se a credencial for do tipo "Access Token"
+      accessToken: string;
     };
     const authToken = credentials.accessToken;
 
@@ -537,9 +629,6 @@ export class ExampleNode implements INodeType {
         const funcao = this.getNodeParameter('funcao', itemIndex) as string;
 
         let resultado: any;
-
-        // O seu código original já estava passando a variável authToken para as funções.
-        // O restante da lógica de execução permanece inalterada.
 
         if (recurso === 'contatos') {
           if (funcao === 'listarContato') {
@@ -792,6 +881,46 @@ export class ExampleNode implements INodeType {
               `Função "${funcao}" não implementada para Base de Conhecimento`,
             );
           }
+        } else if (recurso === 'tarefas') {
+            // BLOCO DE EXECUÇÃO: Tarefas Agendadas (NOVO)
+            if (funcao === 'criarTarefaAgendadaWebhook') {
+              const linkWebhookN8n = this.getNodeParameter('linkWebhookN8n', itemIndex) as string;
+              const destinatario = this.getNodeParameter('destinatario', itemIndex) as string;
+              const mensagem = this.getNodeParameter('mensagem', itemIndex) as string;
+              const recorrenciaTipo = this.getNodeParameter('recorrenciaTipo', itemIndex) as string;
+              const recorrenciaValor1 = this.getNodeParameter('recorrenciaValor1', itemIndex) as string;
+              const recorrenciaValor2 = this.getNodeParameter('recorrenciaValor2', itemIndex, undefined) as
+                | string
+                | undefined;
+              const precisarEnviar = this.getNodeParameter('precisarEnviar', itemIndex, undefined) as
+                | boolean
+                | undefined;
+              const codigo = this.getNodeParameter('codigo', itemIndex, undefined) as
+                | string
+                | undefined;
+
+              const configRecorrencia = {
+                tipo: recorrenciaTipo,
+                valor1: recorrenciaValor1,
+                valor2: recorrenciaValor2,
+              };
+
+              resultado = await TarefasResource.criarTarefaAgendadaWebhook(
+                this.getNode(),
+                authToken,
+                destinatario,
+                mensagem,
+                configRecorrencia,
+                linkWebhookN8n,
+                precisarEnviar,
+                codigo,
+              );
+            } else {
+              throw new NodeOperationError(
+                this.getNode(),
+                `Função "${funcao}" não implementada para Tarefas Agendadas`,
+              );
+            }
         } else {
           throw new NodeOperationError(this.getNode(), `Recurso "${recurso}" não implementado`);
         }
