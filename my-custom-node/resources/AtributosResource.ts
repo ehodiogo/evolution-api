@@ -76,4 +76,68 @@ export class AtributosResource {
 			);
 		}
 	}
+
+	/**
+	 * Edita um Atributo Personalizável existente usando o método PATCH.
+	 * O endpoint requer o ID (pk) do Atributo Personalizável na URL.
+	 */
+	static async editarAtributoPersonalizavel(
+		node: INode,
+		authToken: string,
+		atributoId: string, // pk do atributo a ser editado
+		label?: string,
+		valor?: string,
+		type?: string,
+	): Promise<any> {
+		try {
+			if (!atributoId) {
+				throw new NodeOperationError(
+					node,
+					'O ID do Atributo Personalizável (`atributoId`) deve ser fornecido para a edição.',
+				);
+			}
+
+			// O endpoint usa o ID (pk) do atributo para a atualização.
+			// Assumindo a URL base como 'https://backend.loomiecrm.com'
+			const endpoint = `https://backend.loomiecrm.com/atributos-personalizaveis/${atributoId}/update/`;
+
+			// Cria o corpo da requisição apenas com os campos que possuem valor (opcionalmente)
+			const body: { [key: string]: string } = {};
+			if (label !== undefined) body.label = label;
+			if (valor !== undefined) body.valor = valor;
+			if (type !== undefined) body.type = type;
+
+			if (Object.keys(body).length === 0) {
+				throw new NodeOperationError(
+					node,
+					'Nenhum dado de atualização (label, valor, ou type) foi fornecido.',
+				);
+			}
+
+			const response = await fetch(endpoint, {
+				method: 'PATCH', // Método PATCH para atualização parcial
+				headers: {
+					Authorization: `Bearer ${authToken}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(body),
+			});
+
+			if (!response.ok) {
+				const errorBody = await response.json();
+				throw new NodeOperationError(
+					node,
+					`Erro na API (${response.status} ${response.statusText}): ${JSON.stringify(errorBody)}`,
+				);
+			}
+
+			// Retorna os dados atualizados do atributo
+			return await response.json();
+		} catch (error: any) {
+			throw new NodeOperationError(
+				node,
+				`Falha ao editar Atributo Personalizável (ID: ${atributoId}): ${error.message}`,
+			);
+		}
+	}
 }

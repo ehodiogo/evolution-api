@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TarefasResource = exports.RECORRENCIA_TYPE_CHOICES = exports.TAREFA_TYPE_CHOICES = void 0;
 const n8n_workflow_1 = require("n8n-workflow");
+const node_fetch_1 = __importDefault(require("node-fetch"));
 exports.TAREFA_TYPE_CHOICES = {
     WEBHOOK: 'webhook',
 };
@@ -41,7 +45,7 @@ class TarefasResource {
                     }),
                 },
             };
-            const response = await fetch(endpoint, {
+            const response = await (0, node_fetch_1.default)(endpoint, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${authToken}`,

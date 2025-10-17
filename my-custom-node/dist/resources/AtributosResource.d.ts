@@ -11,4 +11,5 @@ export declare const ATRIBUTO_TYPE_CHOICES: {
 };
 export declare class AtributosResource {
     static criarAtributoPersonalizavel(node: INode, authToken: string, negocioId: string, label: string, valor: string, type: string): Promise<any>;
+    static editarAtributoPersonalizavel(node: INode, authToken: string, atributoId: string, label?: string, valor?: string, type?: string): Promise<any>;
 }

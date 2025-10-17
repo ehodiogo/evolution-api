@@ -99,7 +99,10 @@ class ExampleNode {
                     displayName: 'Função',
                     name: 'funcao',
                     type: 'options',
-                    options: [{ name: 'Criar Atributo', value: 'criarAtributo' }],
+                    options: [
+                        { name: 'Criar Atributo', value: 'criarAtributo' },
+                        { name: 'Editar Atributo', value: 'editarAtributo' },
+                    ],
                     default: 'criarAtributo',
                     description: 'Escolha a função a ser executada',
                     displayOptions: { show: { recurso: ['atributos'] } },
@@ -119,9 +122,7 @@ class ExampleNode {
                     displayName: 'Função',
                     name: 'funcao',
                     type: 'options',
-                    options: [
-                        { name: 'Criar Tarefa Agendada (Webhook)', value: 'criarTarefaAgendadaWebhook' },
-                    ],
+                    options: [{ name: 'Criar Tarefa Agendada (Webhook)', value: 'criarTarefaAgendadaWebhook' }],
                     default: 'criarTarefaAgendadaWebhook',
                     description: 'Escolha a função a ser executada para agendamento.',
                     displayOptions: { show: { recurso: ['tarefas'] } },
@@ -430,13 +431,23 @@ class ExampleNode {
                     },
                 },
                 {
+                    displayName: 'ID do Atributo',
+                    name: 'atributoId',
+                    type: 'string',
+                    default: '',
+                    description: 'O ID numérico do Atributo Personalizado a ser editado (obrigatório para Edição).',
+                    displayOptions: {
+                        show: { recurso: ['atributos'], funcao: ['editarAtributo'] },
+                    },
+                },
+                {
                     displayName: 'Label (Rótulo)',
                     name: 'label',
                     type: 'string',
                     default: '',
                     description: 'O nome do atributo (ex: "Cor Favorita").',
                     displayOptions: {
-                        show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
+                        show: { recurso: ['atributos'], funcao: ['criarAtributo', 'editarAtributo'] },
                     },
                 },
                 {
@@ -446,7 +457,7 @@ class ExampleNode {
                     default: '',
                     description: 'O valor do atributo (ex: "Azul" ou "100"). Deve ser string.',
                     displayOptions: {
-                        show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
+                        show: { recurso: ['atributos'], funcao: ['criarAtributo', 'editarAtributo'] },
                     },
                 },
                 {
@@ -466,7 +477,7 @@ class ExampleNode {
                     default: 'string',
                     description: 'O tipo de dado armazenado (string, integer, date, etc.).',
                     displayOptions: {
-                        show: { recurso: ['atributos'], funcao: ['criarAtributo'] },
+                        show: { recurso: ['atributos'], funcao: ['criarAtributo', 'editarAtributo'] },
                     },
                 },
                 {
@@ -695,6 +706,13 @@ class ExampleNode {
                         const atributoValor = this.getNodeParameter('atributoValor', itemIndex);
                         const atributoType = this.getNodeParameter('atributoType', itemIndex);
                         resultado = await AtributosResource_1.AtributosResource.criarAtributoPersonalizavel(this.getNode(), authToken, negocioId, label, atributoValor, atributoType);
+                    }
+                    else if (funcao === 'editarAtributo') {
+                        const atributoId = this.getNodeParameter('atributoId', itemIndex);
+                        const label = this.getNodeParameter('label', itemIndex, undefined);
+                        const atributoValor = this.getNodeParameter('atributoValor', itemIndex, undefined);
+                        const atributoType = this.getNodeParameter('atributoType', itemIndex, undefined);
+                        resultado = await AtributosResource_1.AtributosResource.editarAtributoPersonalizavel(this.getNode(), authToken, atributoId, label, atributoValor, atributoType);
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Atributos Personalizados`);
