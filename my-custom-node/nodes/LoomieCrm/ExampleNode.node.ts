@@ -370,7 +370,14 @@ export class ExampleNode implements INodeType {
 					},
 				},
 			}, // Parâmetros para Notificações
-
+			{
+				displayName: 'ID do Preset (Opcional)',
+				name: 'presetId',
+				type: 'string',
+				default: '',
+				description: 'O ID do Preset a ser usado para preencher o novo negócio (opcional).',
+				displayOptions: { show: { recurso: ['negocios'], funcao: ['criarNegocio'] } },
+			},
 			{
 				displayName: 'Tipo',
 				name: 'tipo',
@@ -713,6 +720,9 @@ export class ExampleNode implements INodeType {
 						valor = this.getNodeParameter('valor', itemIndex) as number;
 						estagioId = this.getNodeParameter('estagioId', itemIndex) as string;
 						contatoId = this.getNodeParameter('contatoId', itemIndex) as string;
+						const presetId = this.getNodeParameter('presetId', itemIndex, undefined) as
+							| string
+							| undefined;
 
 						resultado = await NegociosResource.criarNegocio(
 							this.getNode(),
@@ -721,6 +731,7 @@ export class ExampleNode implements INodeType {
 							valor,
 							estagioId,
 							contatoId,
+							presetId,
 						);
 					} else if (funcao === 'obterNegocio') {
 						negocioId = this.getNodeParameter('negocioId', itemIndex) as string;

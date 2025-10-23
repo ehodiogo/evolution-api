@@ -7,9 +7,12 @@ exports.NegociosResource = void 0;
 const n8n_workflow_1 = require("n8n-workflow");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 class NegociosResource {
-    static async criarNegocio(node, authToken, titulo, valor, estagioId, contatoId) {
+    static async criarNegocio(node, authToken, titulo, valor, estagioId, contatoId, presetId) {
         try {
             const body = { titulo, valor, estagio_id: estagioId, contato_id: contatoId };
+            if (presetId !== undefined) {
+                body.preset_id = presetId;
+            }
             const response = await (0, node_fetch_1.default)('https://backend.loomiecrm.com/negocios/', {
                 method: 'POST',
                 headers: {

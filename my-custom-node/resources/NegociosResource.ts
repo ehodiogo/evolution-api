@@ -13,9 +13,13 @@ export class NegociosResource {
 		valor: number,
 		estagioId: string,
 		contatoId: string,
+		presetId?: string,
 	): Promise<any> {
 		try {
-			const body = { titulo, valor, estagio_id: estagioId, contato_id: contatoId };
+			const body: any = { titulo, valor, estagio_id: estagioId, contato_id: contatoId };
+			if (presetId !== undefined) {
+				body.preset_id = presetId;
+			}
 
 			const response = await fetch('https://backend.loomiecrm.com/negocios/', {
 				method: 'POST',

@@ -344,6 +344,14 @@ class ExampleNode {
                     },
                 },
                 {
+                    displayName: 'ID do Preset (Opcional)',
+                    name: 'presetId',
+                    type: 'string',
+                    default: '',
+                    description: 'O ID do Preset a ser usado para preencher o novo negócio (opcional).',
+                    displayOptions: { show: { recurso: ['negocios'], funcao: ['criarNegocio'] } },
+                },
+                {
                     displayName: 'Tipo',
                     name: 'tipo',
                     type: 'options',
@@ -642,7 +650,8 @@ class ExampleNode {
                         valor = this.getNodeParameter('valor', itemIndex);
                         estagioId = this.getNodeParameter('estagioId', itemIndex);
                         contatoId = this.getNodeParameter('contatoId', itemIndex);
-                        resultado = await NegociosResource_1.NegociosResource.criarNegocio(this.getNode(), authToken, titulo, valor, estagioId, contatoId);
+                        const presetId = this.getNodeParameter('presetId', itemIndex, undefined);
+                        resultado = await NegociosResource_1.NegociosResource.criarNegocio(this.getNode(), authToken, titulo, valor, estagioId, contatoId, presetId);
                     }
                     else if (funcao === 'obterNegocio') {
                         negocioId = this.getNodeParameter('negocioId', itemIndex);
