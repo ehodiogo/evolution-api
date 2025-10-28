@@ -9,6 +9,7 @@ const NotasResource_1 = require("../../resources/NotasResource");
 const AtributosResource_1 = require("../../resources/AtributosResource");
 const KnowledgeResource_1 = require("../../resources/KnowledgeResource");
 const TarefaResource_1 = require("../../resources/TarefaResource");
+const AtendimentoResource_1 = require("../../resources/AtendimentoResource");
 class ExampleNode {
     constructor() {
         this.description = {
@@ -44,6 +45,7 @@ class ExampleNode {
                         { name: 'Atributos Personalizados', value: 'atributos' },
                         { name: 'Base de Conhecimento', value: 'knowledge' },
                         { name: 'Tarefas Agendadas', value: 'tarefas' },
+                        { name: 'Atendimento Humano', value: 'atendimento' },
                     ],
                     default: 'contatos',
                     description: 'Escolha o conjunto de funções',
@@ -214,6 +216,41 @@ class ExampleNode {
                     description: 'Um código de referência para a tarefa (opcional).',
                     displayOptions: {
                         show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+                    },
+                },
+                {
+                    displayName: 'Função',
+                    name: 'funcao',
+                    type: 'options',
+                    options: [
+                        { name: 'Ativar/Desativar Atendimento Humano', value: 'toggleAtendimentoHumano' },
+                    ],
+                    default: 'toggleAtendimentoHumano',
+                    description: 'Ativa ou desativa a pausa do bot para atendimento humano.',
+                    displayOptions: { show: { recurso: ['atendimento'] } },
+                },
+                {
+                    displayName: 'ID da Conversa',
+                    name: 'conversaIdAtendimento',
+                    type: 'string',
+                    default: '',
+                    description: 'O ID da conversa onde o atendimento humano será ativado/desativado.',
+                    displayOptions: {
+                        show: { recurso: ['atendimento'], funcao: ['toggleAtendimentoHumano'] },
+                    },
+                },
+                {
+                    displayName: 'Ação',
+                    name: 'acaoAtendimento',
+                    type: 'options',
+                    options: [
+                        { name: 'Ativar (Pausar o Bot por 15 min)', value: 'true' },
+                        { name: 'Desativar (Ligar o Bot Imediatamente)', value: 'false' },
+                    ],
+                    default: 'true',
+                    description: 'Escolha se deseja Ativar (pausar o bot) ou Desativar (retomar o bot) o atendimento humano.',
+                    displayOptions: {
+                        show: { recurso: ['atendimento'], funcao: ['toggleAtendimentoHumano'] },
                     },
                 },
                 {
@@ -776,6 +813,20 @@ class ExampleNode {
                     }
                     else {
                         throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Tarefas Agendadas`);
+                    }
+                }
+                else if (recurso === 'atendimento') {
+                    if (funcao === 'toggleAtendimentoHumano') {
+                        const conversaId = this.getNodeParameter('conversaIdAtendimento', itemIndex);
+                        const acaoAtendimento = this.getNodeParameter('acaoAtendimento', itemIndex);
+                        const ativar = acaoAtendimento === 'true';
+                        if (!conversaId) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'O ID da Conversa é obrigatório para Ativar/Desativar Atendimento Humano.');
+                        }
+                        resultado = await AtendimentoResource_1.AtendimentoResource.toggleAtendimentoHumano(this.getNode(), authToken, conversaId, ativar);
+                    }
+                    else {
+                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Função "${funcao}" não implementada para Atendimento Humano`);
                     }
                 }
                 else {

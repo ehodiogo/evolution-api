@@ -12,6 +12,7 @@ import { NotasResource } from '../../resources/NotasResource';
 import { AtributosResource } from '../../resources/AtributosResource';
 import { KnowledgeResource } from '../../resources/KnowledgeResource';
 import { TarefasResource, RECORRENCIA_TYPE_CHOICES } from '../../resources/TarefaResource';
+import { AtendimentoResource } from '../../resources/AtendimentoResource';
 
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,7 +49,8 @@ export class ExampleNode implements INodeType {
 					{ name: 'Notas de Atendimento', value: 'notas' },
 					{ name: 'Atributos Personalizados', value: 'atributos' },
 					{ name: 'Base de Conhecimento', value: 'knowledge' },
-					{ name: 'Tarefas Agendadas', value: 'tarefas' }, // NOVO RECURSO
+					{ name: 'Tarefas Agendadas', value: 'tarefas' },
+					{ name: 'Atendimento Humano', value: 'atendimento' },
 				],
 				default: 'contatos',
 				description: 'Escolha o conjunto de funções',
@@ -232,6 +234,43 @@ export class ExampleNode implements INodeType {
 				description: 'Um código de referência para a tarefa (opcional).',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
+				},
+			},
+			{
+				displayName: 'Função',
+				name: 'funcao',
+				type: 'options',
+				options: [
+					{ name: 'Ativar/Desativar Atendimento Humano', value: 'toggleAtendimentoHumano' },
+				],
+				default: 'toggleAtendimentoHumano',
+				description: 'Ativa ou desativa a pausa do bot para atendimento humano.',
+				displayOptions: { show: { recurso: ['atendimento'] } },
+			}, // Parâmetros Comuns para Atendimento Humano (NOVO)
+
+			{
+				displayName: 'ID da Conversa',
+				name: 'conversaIdAtendimento', // Nome diferente para evitar conflito com conversaId de 'notas'
+				type: 'string',
+				default: '',
+				description: 'O ID da conversa onde o atendimento humano será ativado/desativado.',
+				displayOptions: {
+					show: { recurso: ['atendimento'], funcao: ['toggleAtendimentoHumano'] },
+				},
+			},
+			{
+				displayName: 'Ação',
+				name: 'acaoAtendimento',
+				type: 'options',
+				options: [
+					{ name: 'Ativar (Pausar o Bot por 15 min)', value: 'true' },
+					{ name: 'Desativar (Ligar o Bot Imediatamente)', value: 'false' },
+				],
+				default: 'true',
+				description:
+					'Escolha se deseja Ativar (pausar o bot) ou Desativar (retomar o bot) o atendimento humano.',
+				displayOptions: {
+					show: { recurso: ['atendimento'], funcao: ['toggleAtendimentoHumano'] },
 				},
 			},
 			// FIM dos Parâmetros Tarefas Agendadas
@@ -970,6 +1009,33 @@ export class ExampleNode implements INodeType {
 						throw new NodeOperationError(
 							this.getNode(),
 							`Função "${funcao}" não implementada para Tarefas Agendadas`,
+						);
+					}
+				} else if (recurso === 'atendimento') {
+					// ✅ NOVO BLOCO DE EXECUÇÃO: Atendimento Humano
+					if (funcao === 'toggleAtendimentoHumano') {
+						const conversaId = this.getNodeParameter('conversaIdAtendimento', itemIndex) as string;
+						// O valor do parâmetro é uma string 'true' ou 'false', precisa converter para boolean
+						const acaoAtendimento = this.getNodeParameter('acaoAtendimento', itemIndex) as string;
+						const ativar = acaoAtendimento === 'true';
+
+						if (!conversaId) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'O ID da Conversa é obrigatório para Ativar/Desativar Atendimento Humano.',
+							);
+						}
+
+						resultado = await AtendimentoResource.toggleAtendimentoHumano(
+							this.getNode(),
+							authToken,
+							conversaId,
+							ativar,
+						);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${funcao}" não implementada para Atendimento Humano`,
 						);
 					}
 				} else {
