@@ -15,7 +15,7 @@ class ExampleNode {
         this.description = {
             displayName: 'LoomieCRM Node',
             name: 'exampleNode',
-            icon: 'file:loomiecrm.svg',
+            icon: 'file:./loomiecrm.svg',
             group: ['transform'],
             version: 1,
             description: 'Node com funções da API LoomieCRM',
