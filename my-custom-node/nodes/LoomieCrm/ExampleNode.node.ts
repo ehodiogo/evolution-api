@@ -18,7 +18,7 @@ export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'LoomieCRM Node',
 		name: 'exampleNode',
-		icon: 'file:./loomiecrm.svg',
+		icon: 'file:LoomieCrm/loomiecrm.svg',
 		group: ['transform'],
 		version: 1,
 		description: 'Node com funções da API LoomieCRM',
