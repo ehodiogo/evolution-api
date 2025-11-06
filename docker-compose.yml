@@ -76,8 +76,8 @@ services:
       N8N_LOG_LEVEL: ${N8N_LOG_LEVEL}
       N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: ${N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE}
     volumes:
-      - ./my-custom-node:/home/node/.n8n/custom-nodes/my-custom-node
       - n8n-docker-data:/home/node/.n8n
+      - ./my-custom-node:/home/node/.n8n/custom-nodes/my-custom-node
     networks:
       - loomie-network
     depends_on:
