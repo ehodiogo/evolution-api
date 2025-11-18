@@ -13,7 +13,28 @@ import { AtributosResource } from '../../resources/AtributosResource';
 import { KnowledgeResource } from '../../resources/KnowledgeResource';
 import { TarefasResource, RECORRENCIA_TYPE_CHOICES } from '../../resources/TarefaResource';
 import { AtendimentoResource } from '../../resources/AtendimentoResource';
+import { CalendarioResource } from '../../resources/CalendarioResource';
 
+interface IItemCalendario {
+	titulo: string;
+	inicio: string; // Espera-se um formato ISO 8601 (ex: "YYYY-MM-DDTHH:mm:ssZ")
+	fim: string; // Espera-se um formato ISO 8601
+	tipo?: 'evento' | 'tarefa' | 'ausente';
+	descricao?: string;
+	link_reuniao?: string;
+
+	// Parâmetros de criação (o serializer espera 'contato' como o ID)
+	contato?: number | null;
+	cor?: string;
+	notificar?: boolean;
+	minutos_antes_notificar?: number;
+
+	// Campos de retorno (read_only no serializer)
+	id?: number;
+	contato_nome?: string;
+	cor_default?: string;
+	// Outros campos de retorno como 'criado_em', 'atualizado_em'
+}
 export class ExampleNode implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'LoomieCRM Node',
@@ -51,6 +72,7 @@ export class ExampleNode implements INodeType {
 					{ name: 'Base de Conhecimento', value: 'knowledge' },
 					{ name: 'Tarefas Agendadas', value: 'tarefas' },
 					{ name: 'Atendimento Humano', value: 'atendimento' },
+					{ name: 'Calendário', value: 'calendario' },
 				],
 				default: 'contatos',
 				description: 'Escolha o conjunto de funções',
@@ -141,6 +163,180 @@ export class ExampleNode implements INodeType {
 				default: 'criarTarefaAgendadaWebhook',
 				description: 'Escolha a função a ser executada para agendamento.',
 				displayOptions: { show: { recurso: ['tarefas'] } },
+			},
+			// Funções de Calendário (NOVO)
+			{
+				displayName: 'Função',
+				name: 'funcao',
+				type: 'options',
+				options: [
+					{ name: 'Listar Itens', value: 'listarItens' },
+					{ name: 'Criar Item', value: 'criarItem' },
+					{ name: 'Deletar Item', value: 'deletarItem' },
+				],
+				default: 'listarItens',
+				description: 'Escolha a função a ser executada para o Calendário.',
+				displayOptions: { show: { recurso: ['calendario'] } },
+			},
+			// --- Parâmetros de Calendário ---
+			{
+				displayName: 'Data Inicial',
+				name: 'dataInicio',
+				type: 'dateTime',
+				default: '',
+				description: 'A data e hora mínima para listar eventos (ex: 2025-01-01T00:00:00).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['listarItens'] },
+				},
+			},
+			{
+				displayName: 'Data Final',
+				name: 'dataFim',
+				type: 'dateTime',
+				default: '',
+				description: 'A data e hora máxima para listar eventos (ex: 2025-01-31T23:59:59).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['listarItens'] },
+				},
+			},
+			{
+				displayName: 'Máximo de Resultados',
+				name: 'limite',
+				type: 'number',
+				typeOptions: {
+					numberPrecision: 0,
+				},
+				default: 10,
+				description: 'O número máximo de eventos a serem retornados.',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['listarItens'] },
+				},
+			},
+
+			// Parâmetros para Criar Evento
+			{
+				displayName: 'Título do Evento',
+				name: 'tituloEvento',
+				type: 'string',
+				default: '',
+				description: 'O título ou assunto do evento (obrigatório).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Tipo de Item',
+				name: 'tipoItem',
+				type: 'options',
+				options: [
+					{ name: 'Evento', value: 'evento' },
+					{ name: 'Tarefa', value: 'tarefa' },
+					{ name: 'Ausente', value: 'ausente' },
+				],
+				default: 'evento',
+				description: 'O tipo do item de calendário.',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Descrição',
+				name: 'descricaoEvento',
+				type: 'string',
+				typeOptions: { multiline: true },
+				default: '',
+				description: 'Detalhes ou agenda do evento.',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Data e Hora de Início',
+				name: 'startDateTime',
+				type: 'dateTime',
+				default: '',
+				description: 'Data e hora de início do evento (obrigatório, formato ISO 8601).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Data e Hora de Fim',
+				name: 'endDateTime',
+				type: 'dateTime',
+				default: '',
+				description: 'Data e hora de término do evento (obrigatório, formato ISO 8601).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Link da Reunião (Opcional)',
+				name: 'linkReuniao',
+				type: 'string',
+				default: '',
+				description: 'URL para a sala de reunião (ex: Zoom, Google Meet).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'ID do Contato Relacionado',
+				name: 'contatoIdCalendario',
+				type: 'number',
+				typeOptions: {
+					numberPrecision: 0,
+				},
+				default: 0,
+				description: 'ID do Contato do LoomieCRM a ser associado ao item (opcional).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Cor (Hexadecimal)',
+				name: 'corEvento',
+				type: 'string',
+				default: '',
+				description: 'Cor em formato hexadecimal (ex: #FF0000) para o item no calendário.',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Notificar',
+				name: 'notificar',
+				type: 'boolean',
+				default: false,
+				description: 'Se deve enviar uma notificação sobre o evento.',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'] },
+				},
+			},
+			{
+				displayName: 'Minutos Antes de Notificar',
+				name: 'minutosAntesNotificar',
+				type: 'number',
+				typeOptions: {
+					numberPrecision: 0,
+				},
+				default: 15,
+				description: 'Tempo em minutos antes do início para enviar a notificação (se ativada).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['criarItem'], notificar: [true] },
+				},
+			},
+
+			// Parâmetros para Deletar Evento
+			{
+				displayName: 'ID do Evento',
+				name: 'eventId',
+				type: 'string',
+				default: '',
+				description: 'O ID único do evento a ser removido (obrigatório).',
+				displayOptions: {
+					show: { recurso: ['calendario'], funcao: ['deletarItem'] },
+				},
 			},
 
 			// Parâmetros de Tarefas Agendadas (NOVO)
@@ -1036,6 +1232,79 @@ export class ExampleNode implements INodeType {
 						throw new NodeOperationError(
 							this.getNode(),
 							`Função "${funcao}" não implementada para Atendimento Humano`,
+						);
+					}
+				} else if (recurso === 'calendario') {
+					// CORREÇÃO: Usar 'funcaoCalendario' (assumindo que esta é a key correta)
+					const calendarioFuncao = this.getNodeParameter('funcao', itemIndex) as string;
+
+					if (calendarioFuncao === 'listarItens') {
+						const dataInicio = this.getNodeParameter('dataInicio', itemIndex) as string;
+						const dataFim = this.getNodeParameter('dataFim', itemIndex) as string;
+						const limite = this.getNodeParameter('limite', itemIndex) as number;
+
+						resultado = await CalendarioResource.listarItens(
+							this.getNode(),
+							authToken,
+							dataInicio,
+							dataFim,
+							limite,
+						);
+					} else if (calendarioFuncao === 'criarItem') {
+						// 1. Obter todos os parâmetros do nó
+						const tituloEvento = this.getNodeParameter('tituloEvento', itemIndex) as string;
+						const descricaoEvento = this.getNodeParameter('descricaoEvento', itemIndex) as string;
+						const startDateTime = this.getNodeParameter('startDateTime', itemIndex) as string;
+						const endDateTime = this.getNodeParameter('endDateTime', itemIndex) as string;
+
+						// Os parâmetros do n8n (que estavam incorretos na chamada anterior):
+						const tipoItem = this.getNodeParameter('tipoItem', itemIndex) as string;
+						const linkReuniao = this.getNodeParameter('linkReuniao', itemIndex) as string;
+						const contatoIdCalendario = this.getNodeParameter(
+							'contatoIdCalendario',
+							itemIndex,
+						) as number;
+						const corEvento = this.getNodeParameter('corEvento', itemIndex) as string;
+						const notificar = this.getNodeParameter('notificar', itemIndex) as boolean;
+						const minutosAntesNotificar = this.getNodeParameter(
+							'minutosAntesNotificar',
+							itemIndex,
+						) as number;
+
+						// 2. CORREÇÃO: Agrupar os parâmetros no objeto IItemCalendario
+						const itemData: IItemCalendario = {
+							titulo: tituloEvento,
+							inicio: startDateTime,
+							fim: endDateTime,
+							tipo: tipoItem as 'evento' | 'tarefa' | 'ausente',
+							descricao: descricaoEvento,
+							link_reuniao: linkReuniao,
+							contato: contatoIdCalendario > 0 ? contatoIdCalendario : null,
+							cor: corEvento,
+							notificar: notificar,
+							minutos_antes_notificar: minutosAntesNotificar,
+						};
+
+						// 3. Chamar a função passando o objeto de dados único
+						resultado = await CalendarioResource.criarItem(this.getNode(), authToken, itemData);
+					} else if (calendarioFuncao === 'deletarItem') {
+						const eventIdString = this.getNodeParameter('eventId', itemIndex) as string;
+
+						if (!eventIdString || isNaN(parseInt(eventIdString, 10))) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'O ID do Evento (eventId) é obrigatório e deve ser um número válido para deletar.',
+							);
+						}
+
+						// CORREÇÃO: Converter eventId de string (lido do nó) para number (esperado pelo Resource)
+						const eventId = parseInt(eventIdString, 10);
+
+						resultado = await CalendarioResource.deletarItem(this.getNode(), authToken, eventId);
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Função "${calendarioFuncao}" não implementada para Calendário`,
 						);
 					}
 				} else {
