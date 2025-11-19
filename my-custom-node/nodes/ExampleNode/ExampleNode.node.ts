@@ -50,7 +50,7 @@ export class ExampleNode implements INodeType {
 		// @ts-expect-error: n8n AI Tool property
 		tool: {
 			description:
-				'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; criar Bases de Conhecimento completas; e **criar tarefas agendadas (webhooks)**.',
+				'Use esta ferramenta para gerenciar dados no LoomieCRM. Ela permite listar contatos; criar, obter, atualizar ou mover negócios; criar notificações; criar notas de atendimento; criar atributos personalizados; criar Bases de Conhecimento completas; e **criar tarefas agendadas (webhooks)**',
 		},
 		credentials: [
 			{
@@ -64,15 +64,15 @@ export class ExampleNode implements INodeType {
 				name: 'recurso',
 				type: 'options',
 				options: [
+					{ name: 'Atendimento Humano', value: 'atendimento' },
+					{ name: 'Atributos Personalizados', value: 'atributos' },
+					{ name: 'Base De Conhecimento', value: 'knowledge' },
+					{ name: 'Calendário', value: 'calendario' },
 					{ name: 'Contatos', value: 'contatos' },
 					{ name: 'Negócios', value: 'negocios' },
+					{ name: 'Notas De Atendimento', value: 'notas' },
 					{ name: 'Notificações', value: 'notificacoes' },
-					{ name: 'Notas de Atendimento', value: 'notas' },
-					{ name: 'Atributos Personalizados', value: 'atributos' },
-					{ name: 'Base de Conhecimento', value: 'knowledge' },
 					{ name: 'Tarefas Agendadas', value: 'tarefas' },
-					{ name: 'Atendimento Humano', value: 'atendimento' },
-					{ name: 'Calendário', value: 'calendario' },
 				],
 				default: 'contatos',
 				description: 'Escolha o conjunto de funções',
@@ -84,9 +84,9 @@ export class ExampleNode implements INodeType {
 				name: 'funcao',
 				type: 'options',
 				options: [
-					{ name: 'Listar Contato', value: 'listarContato' },
+					{ name: 'Buscar Contato Por Telefone', value: 'buscarContatoPorTelefone' },
 					{ name: 'Criar Contato', value: 'criarContato' },
-					{ name: 'Buscar Contato por Telefone', value: 'buscarContatoPorTelefone' },
+					{ name: 'Listar Contato', value: 'listarContato' },
 				],
 				default: 'listarContato',
 				description: 'Escolha a função a ser executada',
@@ -98,12 +98,12 @@ export class ExampleNode implements INodeType {
 				name: 'funcao',
 				type: 'options',
 				options: [
-					{ name: 'Criar Negócio', value: 'criarNegocio' },
-					{ name: 'Obter Negócio', value: 'obterNegocio' },
 					{ name: 'Atualizar Negócio', value: 'atualizarNegocio' },
+					{ name: 'Buscar Negócio Por Telefone', value: 'buscarNegocioPorTelefone' },
+					{ name: 'Criar Negócio', value: 'criarNegocio' },
+					{ name: 'Listar Negócios Por Estágio', value: 'listarNegociosPorEstagio' },
+					{ name: 'Obter Negócio', value: 'obterNegocio' },
 					{ name: 'Trocar Estágio', value: 'trocarEstagio' },
-					{ name: 'Listar Negócios por Estágio', value: 'listarNegociosPorEstagio' },
-					{ name: 'Buscar Negócio por Telefone', value: 'buscarNegocioPorTelefone' },
 				],
 				default: 'criarNegocio',
 				description: 'Escolha a função a ser executada',
@@ -148,7 +148,7 @@ export class ExampleNode implements INodeType {
 				name: 'funcao',
 				type: 'options',
 				options: [
-					{ name: 'Criar Base de Conhecimento Completa', value: 'criarBaseDeConhecimentoCompleta' },
+					{ name: 'Criar Base De Conhecimento Completa', value: 'criarBaseDeConhecimentoCompleta' },
 				],
 				default: 'criarBaseDeConhecimentoCompleta',
 				description: 'Escolha a função a ser executada',
@@ -161,7 +161,7 @@ export class ExampleNode implements INodeType {
 				type: 'options',
 				options: [{ name: 'Criar Tarefa Agendada (Webhook)', value: 'criarTarefaAgendadaWebhook' }],
 				default: 'criarTarefaAgendadaWebhook',
-				description: 'Escolha a função a ser executada para agendamento.',
+				description: 'Escolha a função a ser executada para agendamento',
 				displayOptions: { show: { recurso: ['tarefas'] } },
 			},
 			// Funções de Calendário (NOVO)
@@ -175,7 +175,7 @@ export class ExampleNode implements INodeType {
 					{ name: 'Deletar Item', value: 'deletarItem' },
 				],
 				default: 'listarItens',
-				description: 'Escolha a função a ser executada para o Calendário.',
+				description: 'Escolha a função a ser executada para o Calendário',
 				displayOptions: { show: { recurso: ['calendario'] } },
 			},
 			// --- Parâmetros de Calendário ---
@@ -184,7 +184,7 @@ export class ExampleNode implements INodeType {
 				name: 'dataInicio',
 				type: 'dateTime',
 				default: '',
-				description: 'A data e hora mínima para listar eventos (ex: 2025-01-01T00:00:00).',
+				description: 'A data e hora mínima para listar eventos (ex: 2025-01-01T00:00:00)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['listarItens'] },
 				},
@@ -194,20 +194,20 @@ export class ExampleNode implements INodeType {
 				name: 'dataFim',
 				type: 'dateTime',
 				default: '',
-				description: 'A data e hora máxima para listar eventos (ex: 2025-01-31T23:59:59).',
+				description: 'A data e hora máxima para listar eventos (ex: 2025-01-31T23:59:59)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['listarItens'] },
 				},
 			},
 			{
-				displayName: 'Máximo de Resultados',
+				displayName: 'Máximo De Resultados',
 				name: 'limite',
 				type: 'number',
 				typeOptions: {
 					numberPrecision: 0,
 				},
 				default: 10,
-				description: 'O número máximo de eventos a serem retornados.',
+				description: 'O número máximo de eventos a serem retornados',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['listarItens'] },
 				},
@@ -215,17 +215,17 @@ export class ExampleNode implements INodeType {
 
 			// Parâmetros para Criar Evento
 			{
-				displayName: 'Título do Evento',
+				displayName: 'Título Do Evento',
 				name: 'tituloEvento',
 				type: 'string',
 				default: '',
-				description: 'O título ou assunto do evento (obrigatório).',
+				description: 'O título ou assunto do evento (obrigatório)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
 			},
 			{
-				displayName: 'Tipo de Item',
+				displayName: 'Tipo De Item',
 				name: 'tipoItem',
 				type: 'options',
 				options: [
@@ -234,7 +234,7 @@ export class ExampleNode implements INodeType {
 					{ name: 'Ausente', value: 'ausente' },
 				],
 				default: 'evento',
-				description: 'O tipo do item de calendário.',
+				description: 'O tipo do item de calendário',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
@@ -245,50 +245,50 @@ export class ExampleNode implements INodeType {
 				type: 'string',
 				typeOptions: { multiline: true },
 				default: '',
-				description: 'Detalhes ou agenda do evento.',
+				description: 'Detalhes ou agenda do evento',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
 			},
 			{
-				displayName: 'Data e Hora de Início',
+				displayName: 'Data E Hora De Início',
 				name: 'startDateTime',
 				type: 'dateTime',
 				default: '',
-				description: 'Data e hora de início do evento (obrigatório, formato ISO 8601).',
+				description: 'Data e hora de início do evento (obrigatório, formato ISO 8601)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
 			},
 			{
-				displayName: 'Data e Hora de Fim',
+				displayName: 'Data E Hora De Fim',
 				name: 'endDateTime',
 				type: 'dateTime',
 				default: '',
-				description: 'Data e hora de término do evento (obrigatório, formato ISO 8601).',
+				description: 'Data e hora de término do evento (obrigatório, formato ISO 8601)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
 			},
 			{
-				displayName: 'Link da Reunião (Opcional)',
+				displayName: 'Link Da Reunião (Opcional)',
 				name: 'linkReuniao',
 				type: 'string',
 				default: '',
-				description: 'URL para a sala de reunião (ex: Zoom, Google Meet).',
+				description: 'URL para a sala de reunião (ex: Zoom, Google Meet)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
 			},
 			{
-				displayName: 'ID do Contato Relacionado',
+				displayName: 'ID Do Contato Relacionado',
 				name: 'contatoIdCalendario',
 				type: 'number',
 				typeOptions: {
 					numberPrecision: 0,
 				},
 				default: 0,
-				description: 'ID do Contato do LoomieCRM a ser associado ao item (opcional).',
+				description: 'ID do Contato do LoomieCRM a ser associado ao item (opcional)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
@@ -298,7 +298,7 @@ export class ExampleNode implements INodeType {
 				name: 'corEvento',
 				type: 'string',
 				default: '',
-				description: 'Cor em formato hexadecimal (ex: #FF0000) para o item no calendário.',
+				description: 'Cor em formato hexadecimal (ex: #FF0000) para o item no calendário',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
@@ -308,20 +308,20 @@ export class ExampleNode implements INodeType {
 				name: 'notificar',
 				type: 'boolean',
 				default: false,
-				description: 'Se deve enviar uma notificação sobre o evento.',
+				description: 'Whether to send a notification about the event',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'] },
 				},
 			},
 			{
-				displayName: 'Minutos Antes de Notificar',
+				displayName: 'Minutos Antes De Notificar',
 				name: 'minutosAntesNotificar',
 				type: 'number',
 				typeOptions: {
 					numberPrecision: 0,
 				},
 				default: 15,
-				description: 'Tempo em minutos antes do início para enviar a notificação (se ativada).',
+				description: 'Tempo em minutos antes do início para enviar a notificação (se ativada)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['criarItem'], notificar: [true] },
 				},
@@ -329,11 +329,11 @@ export class ExampleNode implements INodeType {
 
 			// Parâmetros para Deletar Evento
 			{
-				displayName: 'ID do Evento',
+				displayName: 'ID Do Evento',
 				name: 'eventId',
 				type: 'string',
 				default: '',
-				description: 'O ID único do evento a ser removido (obrigatório).',
+				description: 'O ID único do evento a ser removido (obrigatório)',
 				displayOptions: {
 					show: { recurso: ['calendario'], funcao: ['deletarItem'] },
 				},
@@ -345,17 +345,17 @@ export class ExampleNode implements INodeType {
 				name: 'linkWebhookN8n',
 				type: 'string',
 				default: '',
-				description: 'A URL completa do Webhook do n8n que será chamado no agendamento.',
+				description: 'A URL completa do Webhook do n8n que será chamado no agendamento',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
 			},
 			{
-				displayName: 'Destinatário (ID Contato/ID Negócio/Número do WhatsApp)',
+				displayName: 'Destinatário (ID Contato/ID Negócio/Número Do WhatsApp)',
 				name: 'destinatario',
 				type: 'string',
 				default: '',
-				description: 'ID do Contato ou Negócio (obrigatório).',
+				description: 'ID do Contato ou Negócio (obrigatório)',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
@@ -369,7 +369,7 @@ export class ExampleNode implements INodeType {
 				},
 				default: 'Mudou de estágio!',
 				description:
-					'A nota ou mensagem que será enviada quando a tarefa for executada (obrigatório).',
+					'A nota ou mensagem que será enviada quando a tarefa for executada (obrigatório)',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
@@ -378,14 +378,14 @@ export class ExampleNode implements INodeType {
 				displayName: 'Recorrência - Tipo',
 				name: 'recorrenciaTipo',
 				type: 'options',
+				default: 'unica',
 				options: [
 					{ name: 'Única (Data/Hora)', value: RECORRENCIA_TYPE_CHOICES.UNICA },
 					{ name: 'A Cada X Horas', value: RECORRENCIA_TYPE_CHOICES.HORAS },
 					{ name: 'Diária (Hora)', value: RECORRENCIA_TYPE_CHOICES.DIARIA },
-					{ name: 'Semanal (Dia e Hora)', value: RECORRENCIA_TYPE_CHOICES.DIAS },
+					{ name: 'Semanal (Dia E Hora)', value: RECORRENCIA_TYPE_CHOICES.DIAS },
 				],
-				default: RECORRENCIA_TYPE_CHOICES.UNICA,
-				description: 'Define como a tarefa será repetida.',
+				description: 'Define como a tarefa será repetida',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
@@ -396,7 +396,7 @@ export class ExampleNode implements INodeType {
 				type: 'string',
 				default: '',
 				description:
-					'Data/Hora (unica: YYYY-MM-DD HH:MM), Horas (horas: 1, 2, 3...), Hora do Dia (diaria: HH:MM), Dia da Semana (dias: 0-6).',
+					'Data/Hora (unica: YYYY-MM-DD HH:MM), Horas (horas: 1, 2, 3...), Hora do Dia (diaria: HH:MM), Dia da Semana (dias: 0-6)',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
@@ -407,7 +407,7 @@ export class ExampleNode implements INodeType {
 				type: 'string',
 				default: '',
 				description:
-					'Usado apenas para Recorrência "Diária" (HH:MM de início/fim) ou "Semanal" (Hora do Dia).',
+					'Usado apenas para Recorrência "Diária" (HH:MM de início/fim) ou "Semanal" (Hora do Dia)',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
@@ -417,7 +417,7 @@ export class ExampleNode implements INodeType {
 				name: 'precisarEnviar',
 				type: 'boolean',
 				default: false,
-				description: 'Se verdadeiro, o destinatário receberá uma mensagem de envio (opcional).',
+				description: 'Whether the recipient should receive a send message',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
@@ -427,7 +427,7 @@ export class ExampleNode implements INodeType {
 				name: 'codigo',
 				type: 'string',
 				default: '',
-				description: 'Um código de referência para a tarefa (opcional).',
+				description: 'Um código de referência para a tarefa (opcional)',
 				displayOptions: {
 					show: { recurso: ['tarefas'], funcao: ['criarTarefaAgendadaWebhook'] },
 				},
@@ -440,16 +440,16 @@ export class ExampleNode implements INodeType {
 					{ name: 'Ativar/Desativar Atendimento Humano', value: 'toggleAtendimentoHumano' },
 				],
 				default: 'toggleAtendimentoHumano',
-				description: 'Ativa ou desativa a pausa do bot para atendimento humano.',
+				description: 'Ativa ou desativa a pausa do bot para atendimento humano',
 				displayOptions: { show: { recurso: ['atendimento'] } },
 			}, // Parâmetros Comuns para Atendimento Humano (NOVO)
 
 			{
-				displayName: 'ID da Conversa',
+				displayName: 'ID Da Conversa',
 				name: 'conversaIdAtendimento', // Nome diferente para evitar conflito com conversaId de 'notas'
 				type: 'string',
 				default: '',
-				description: 'O ID da conversa onde o atendimento humano será ativado/desativado.',
+				description: 'O ID da conversa onde o atendimento humano será ativado/desativado',
 				displayOptions: {
 					show: { recurso: ['atendimento'], funcao: ['toggleAtendimentoHumano'] },
 				},
@@ -459,12 +459,12 @@ export class ExampleNode implements INodeType {
 				name: 'acaoAtendimento',
 				type: 'options',
 				options: [
-					{ name: 'Ativar (Pausar o Bot por 15 min)', value: 'true' },
-					{ name: 'Desativar (Ligar o Bot Imediatamente)', value: 'false' },
+					{ name: 'Ativar (Pausar O Bot Por 15 Min)', value: 'true' },
+					{ name: 'Desativar (Ligar O Bot Imediatamente)', value: 'false' },
 				],
 				default: 'true',
 				description:
-					'Escolha se deseja Ativar (pausar o bot) ou Desativar (retomar o bot) o atendimento humano.',
+					'Escolha se deseja Ativar (pausar o bot) ou Desativar (retomar o bot) o atendimento humano',
 				displayOptions: {
 					show: { recurso: ['atendimento'], funcao: ['toggleAtendimentoHumano'] },
 				},
@@ -474,24 +474,24 @@ export class ExampleNode implements INodeType {
 			// ... (Restante dos parâmetros existentes) ...
 			// Parâmetros do Recurso Knowledge Base (Base de Conhecimento)
 			{
-				displayName: 'ID do Cliente',
+				displayName: 'ID Do Cliente',
 				name: 'clientId',
 				type: 'number',
 				typeOptions: {
 					numberPrecision: 0,
 				},
 				default: 0,
-				description: 'O ID numérico do cliente ao qual a base de conhecimento pertence.',
+				description: 'O ID numérico do cliente ao qual a base de conhecimento pertence',
 				displayOptions: {
 					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
 				},
 			},
 			{
-				displayName: 'Nome da Base de Conhecimento',
+				displayName: 'Nome Da Base De Conhecimento',
 				name: 'knowledgeBaseName',
 				type: 'string',
 				default: '',
-				description: 'O nome da nova Base de Conhecimento (KnowledgeBaseSet).',
+				description: 'O nome da nova Base de Conhecimento (KnowledgeBaseSet)',
 				displayOptions: {
 					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
 				},
@@ -505,7 +505,7 @@ export class ExampleNode implements INodeType {
 				},
 				default: '[]',
 				description:
-					'Array de objetos JSON para os campos (Fields) da base. Ex: [{"name": "Cor", "field_type": "TEXT", "required": false}]',
+					'Array de objetos JSON para os campos (Fields) da base. Ex: [{"name": "Cor", "field_type": "TEXT", "required": false}].',
 				displayOptions: {
 					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
 				},
@@ -519,7 +519,7 @@ export class ExampleNode implements INodeType {
 				},
 				default: '[]',
 				description:
-					'Array de objetos JSON para as entradas (Entries/Dados). Ex: [{"values": {"Cor": "Azul", "Preço": 150000}}]',
+					'Array de objetos JSON para as entradas (Entries/Dados). Ex: [{"values": {"Cor": "Azul", "Preço": 150000}}].',
 				displayOptions: {
 					show: { recurso: ['knowledge'], funcao: ['criarBaseDeConhecimentoCompleta'] },
 				},
@@ -528,11 +528,10 @@ export class ExampleNode implements INodeType {
 
 			// Parâmetros Comuns/Negócios
 			{
-				displayName: 'ID do Kanban',
+				displayName: 'ID Do Kanban',
 				name: 'kanbanId',
 				type: 'string',
 				default: '',
-				description: 'ID do Kanban',
 				displayOptions: {
 					show: {
 						recurso: ['negocios'],
@@ -541,11 +540,10 @@ export class ExampleNode implements INodeType {
 				},
 			},
 			{
-				displayName: 'ID do Estágio',
+				displayName: 'ID Do Estágio',
 				name: 'estagioId',
 				type: 'string',
 				default: '',
-				description: 'ID do estágio',
 				displayOptions: {
 					show: {
 						recurso: ['negocios'],
@@ -572,7 +570,7 @@ export class ExampleNode implements INodeType {
 				},
 			},
 			{
-				displayName: 'ID do Estágio',
+				displayName: 'ID Do Estágio',
 				name: 'estagioId',
 				type: 'string',
 				default: '',
@@ -584,7 +582,7 @@ export class ExampleNode implements INodeType {
 				},
 			},
 			{
-				displayName: 'ID do Contato',
+				displayName: 'ID Do Contato',
 				name: 'contatoId',
 				type: 'string',
 				default: '',
@@ -593,11 +591,11 @@ export class ExampleNode implements INodeType {
 				},
 			},
 			{
-				displayName: 'ID do Negócio',
+				displayName: 'ID Do Negócio',
 				name: 'negocioId',
 				type: 'string',
 				default: '',
-				description: 'ID do negócio para obter, atualizar ou anexar atributos.',
+				description: 'ID do negócio para obter, atualizar ou anexar atributos',
 				displayOptions: {
 					show: {
 						recurso: ['negocios', 'atributos'],
@@ -606,11 +604,11 @@ export class ExampleNode implements INodeType {
 				},
 			}, // Parâmetros para Notificações
 			{
-				displayName: 'ID do Preset (Opcional)',
+				displayName: 'ID Do Preset (Opcional)',
 				name: 'presetId',
 				type: 'string',
 				default: '',
-				description: 'O ID do Preset a ser usado para preencher o novo negócio (opcional).',
+				description: 'O ID do Preset a ser usado para preencher o novo negócio (opcional)',
 				displayOptions: { show: { recurso: ['negocios'], funcao: ['criarNegocio'] } },
 			},
 			{
@@ -624,33 +622,33 @@ export class ExampleNode implements INodeType {
 					{ name: 'Informação', value: 'info' },
 				],
 				default: 'info',
-				description: 'Tipo da notificação (boa, alerta, erro, info).',
+				description: 'Tipo da notificação (boa, alerta, erro, info)',
 				displayOptions: {
 					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
 				},
 			},
 			{
-				displayName: 'Texto da Notificação',
+				displayName: 'Texto Da Notificação',
 				name: 'texto',
 				type: 'string',
 				default: '',
-				description: 'Conteúdo principal da notificação (campo "texto" no Django).',
+				description: 'Conteúdo principal da notificação (campo "texto" no Django)',
 				displayOptions: {
 					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
 				},
 			},
 			{
-				displayName: 'ID do Usuário',
+				displayName: 'ID Do Usuário',
 				name: 'userId',
 				type: 'string',
 				default: '',
-				description: 'ID do usuário que receberá a notificação (campo "usuario" no Django).',
+				description: 'ID do usuário que receberá a notificação (campo "usuario" no Django)',
 				displayOptions: {
 					show: { recurso: ['notificacoes'], funcao: ['criarNotificacao'] },
 				},
 			}, // Parâmetros para Notas de Atendimento
 			{
-				displayName: 'Título da Nota',
+				displayName: 'Título Da Nota',
 				name: 'notaTitulo',
 				type: 'string',
 				default: '',
@@ -660,7 +658,7 @@ export class ExampleNode implements INodeType {
 				},
 			},
 			{
-				displayName: 'Conteúdo da Nota',
+				displayName: 'Conteúdo Da Nota',
 				name: 'conteudo',
 				type: 'string',
 				typeOptions: {
@@ -673,41 +671,41 @@ export class ExampleNode implements INodeType {
 				},
 			},
 			{
-				displayName: 'Tipo da Nota',
+				displayName: 'Tipo Da Nota',
 				name: 'notaTipo',
 				type: 'options',
 				options: [
-					{ name: 'Informação', value: 'info' },
+					{ name: 'Follow-Up', value: 'followup' },
 					{ name: 'Importante', value: 'importante' },
-					{ name: 'Urgente', value: 'urgente' },
-					{ name: 'Follow-up', value: 'followup' },
+					{ name: 'Informação', value: 'info' },
 					{ name: 'Problema', value: 'problema' },
 					{ name: 'Solução', value: 'solucao' },
+					{ name: 'Urgente', value: 'urgente' },
 				],
 				default: 'info',
-				description: 'Tipo da nota de atendimento.',
+				description: 'O tipo da nota de atendimento',
 				displayOptions: {
 					show: { recurso: ['notas'], funcao: ['criarNota'] },
 				},
 			},
 			{
-				displayName: 'ID da Conversa (Opcional)',
+				displayName: 'ID Da Conversa (Opcional)',
 				name: 'conversaId',
 				type: 'string',
 				default: '',
-				description: 'ID da conversa à qual a nota deve ser anexada (opcional).',
+				description: 'ID da conversa à qual a nota deve ser anexada (opcional)',
 				displayOptions: {
 					show: { recurso: ['notas'], funcao: ['criarNota'] },
 				},
 			}, // Parâmetros para Atributos Personalizados
 
 			{
-				displayName: 'ID do Atributo',
+				displayName: 'ID Do Atributo',
 				name: 'atributoId',
 				type: 'string',
 				default: '',
 				description:
-					'O ID numérico do Atributo Personalizado a ser editado (obrigatório para Edição).',
+					'O ID numérico do Atributo Personalizado a ser editado (obrigatório para Edição)',
 				displayOptions: {
 					show: { recurso: ['atributos'], funcao: ['editarAtributo'] },
 				},
@@ -717,7 +715,7 @@ export class ExampleNode implements INodeType {
 				name: 'label',
 				type: 'string',
 				default: '',
-				description: 'O nome do atributo (ex: "Cor Favorita").',
+				description: 'O nome do atributo (ex: "Cor Favorita")',
 				displayOptions: {
 					show: { recurso: ['atributos'], funcao: ['criarAtributo', 'editarAtributo'] },
 				},
@@ -735,21 +733,21 @@ export class ExampleNode implements INodeType {
 			},
 
 			{
-				displayName: 'Tipo de Dado',
+				displayName: 'Tipo De Dado',
 				name: 'atributoType',
 				type: 'options',
 				options: [
 					{ name: 'Boolean', value: 'boolean' },
-					{ name: 'Integer', value: 'integer' },
-					{ name: 'Float', value: 'float' },
-					{ name: 'String', value: 'string' },
 					{ name: 'Date', value: 'date' },
 					{ name: 'DateTime', value: 'datetime' },
-					{ name: 'Time', value: 'time' },
+					{ name: 'Float', value: 'float' },
+					{ name: 'Integer', value: 'integer' },
+					{ name: 'String', value: 'string' },
 					{ name: 'Text', value: 'text' },
+					{ name: 'Time', value: 'time' },
 				],
 				default: 'string',
-				description: 'O tipo de dado armazenado (string, integer, date, etc.).',
+				description: 'O tipo de dado armazenado (string, integer, date, etc.)',
 				displayOptions: {
 					show: { recurso: ['atributos'], funcao: ['criarAtributo', 'editarAtributo'] },
 				},
@@ -760,7 +758,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoNome',
 				type: 'string',
 				default: '',
-				description: 'Nome completo do novo contato.',
+				description: 'Nome completo do novo contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -768,7 +766,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoEmail',
 				type: 'string',
 				default: '',
-				description: 'Endereço de email do novo contato.',
+				description: 'Endereço de email do novo contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -776,7 +774,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoTelefone',
 				type: 'string',
 				default: '',
-				description: 'Número de telefone do novo contato.',
+				description: 'Número de telefone do novo contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -784,7 +782,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoEmpresa',
 				type: 'string',
 				default: '',
-				description: 'Empresa do contato.',
+				description: 'Empresa do contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -792,7 +790,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoCargo',
 				type: 'string',
 				default: '',
-				description: 'Cargo do contato na empresa.',
+				description: 'Cargo do contato na empresa',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -800,7 +798,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoEndereco',
 				type: 'string',
 				default: '',
-				description: 'Rua e número do endereço.',
+				description: 'Rua e número do endereço',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -808,7 +806,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoCidade',
 				type: 'string',
 				default: '',
-				description: 'Cidade do contato.',
+				description: 'Cidade do contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -816,7 +814,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoEstado',
 				type: 'string',
 				default: '',
-				description: 'Estado (UF) do contato.',
+				description: 'Estado (UF) do contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -824,15 +822,15 @@ export class ExampleNode implements INodeType {
 				name: 'contatoCep',
 				type: 'string',
 				default: '',
-				description: 'CEP do contato.',
+				description: 'CEP do contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
-				displayName: 'Data de Nascimento',
+				displayName: 'Data De Nascimento',
 				name: 'contatoDataNascimento',
 				type: 'string',
 				default: '',
-				description: 'Data de nascimento (formato YYYY-MM-DD).',
+				description: 'Data de nascimento (formato YYYY-MM-DD)',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 			{
@@ -841,7 +839,7 @@ export class ExampleNode implements INodeType {
 				type: 'string',
 				typeOptions: { multiline: true },
 				default: '',
-				description: 'Quaisquer observações adicionais sobre o contato.',
+				description: 'Quaisquer observações adicionais sobre o contato',
 				displayOptions: { show: { recurso: ['contatos'], funcao: ['criarContato'] } },
 			},
 
@@ -850,7 +848,7 @@ export class ExampleNode implements INodeType {
 				name: 'contatoBuscaTelefone',
 				type: 'string',
 				default: '',
-				description: 'Telefone ou WhatsApp ID do contato para buscar.',
+				description: 'Telefone ou WhatsApp ID do contato para buscar',
 				displayOptions: {
 					show: { recurso: ['contatos'], funcao: ['buscarContatoPorTelefone'] },
 				},
@@ -861,7 +859,7 @@ export class ExampleNode implements INodeType {
 				name: 'telefone',
 				type: 'string',
 				default: '',
-				description: 'Telefone ou WhatsApp ID do contato para buscar o negócio.',
+				description: 'Telefone ou WhatsApp ID do contato para buscar o negócio',
 				displayOptions: {
 					show: { recurso: ['negocios'], funcao: ['buscarNegocioPorTelefone'] },
 				},
@@ -928,7 +926,7 @@ export class ExampleNode implements INodeType {
 						if (!telefone) {
 							throw new NodeOperationError(
 								this.getNode(),
-								'O Telefone/WhatsApp ID é obrigatório para esta função.',
+								'O Telefone/WhatsApp ID é obrigatório para esta função',
 							);
 						}
 
@@ -1218,7 +1216,7 @@ export class ExampleNode implements INodeType {
 						if (!conversaId) {
 							throw new NodeOperationError(
 								this.getNode(),
-								'O ID da Conversa é obrigatório para Ativar/Desativar Atendimento Humano.',
+								'O ID da Conversa é obrigatório para Ativar/Desativar Atendimento Humano',
 							);
 						}
 
@@ -1293,7 +1291,7 @@ export class ExampleNode implements INodeType {
 						if (!eventIdString || isNaN(parseInt(eventIdString, 10))) {
 							throw new NodeOperationError(
 								this.getNode(),
-								'O ID do Evento (eventId) é obrigatório e deve ser um número válido para deletar.',
+								'O ID do Evento (eventId) é obrigatório e deve ser um número válido para deletar',
 							);
 						}
 

@@ -1,15 +1,15 @@
 {
     "name": "n8n-nodes-loomie",
-    "version": "0.1.0",
-    "description": "",
+    "version": "0.1.2",
+    "description": "Node customizado da Loomie",
     "keywords": [
         "n8n-community-node-package"
     ],
     "license": "MIT",
     "homepage": "",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "Diogo Antonio Bohrer Pereira",
+        "email": "dabpereiradev@gmail.com"
     },
     "repository": {
         "type": "git",
@@ -33,7 +33,7 @@
     "n8n": {
         "n8nNodesApiVersion": 1,
         "credentials": [
-            "dist/credentials/loomieCRMApi.credentials.js"
+            "dist/credentials/ExampleCredentialsApi.credentials.js"
         ],
         "nodes": [
             "dist/nodes/ExampleNode/ExampleNode.node.js"
